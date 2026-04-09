@@ -260,6 +260,135 @@
       font-weight: 700;
     }
 
+    .mini-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .mini-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.78);
+      font-size: 0.34em;
+      font-weight: 700;
+      color: var(--ink-soft);
+    }
+
+    .process-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .process-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.76);
+      padding: 10px 12px;
+      min-height: 82px;
+    }
+
+    .process-box .k {
+      font-size: 0.36em;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: var(--ink-soft);
+      text-transform: uppercase;
+    }
+
+    .process-box .v {
+      margin-top: 4px;
+      font-size: 0.48em;
+      line-height: 1.45;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .stack-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .stack-item {
+      display: grid;
+      grid-template-columns: 108px 1fr 78px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stack-label,
+    .stack-meta {
+      font-size: 0.38em;
+      font-weight: 800;
+      color: var(--ink-soft);
+    }
+
+    .stack-meta {
+      text-align: right;
+    }
+
+    .stack-track {
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(18, 52, 59, 0.08);
+      overflow: hidden;
+    }
+
+    .stack-fill {
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    .sample-board {
+      display: grid;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .sample-row {
+      display: grid;
+      grid-template-columns: 48px 1fr 60px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sample-id,
+    .sample-score {
+      font-size: 0.37em;
+      font-weight: 800;
+      color: var(--ink-soft);
+    }
+
+    .sample-score {
+      text-align: right;
+    }
+
+    .sample-track {
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(18, 52, 59, 0.08);
+      overflow: hidden;
+    }
+
+    .sample-fill {
+      height: 100%;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      color: #fff;
+      font-size: 0.33em;
+      font-weight: 800;
+    }
+
     pre {
       font-family: "JetBrains Mono", monospace;
       font-size: 0.34em;
@@ -337,9 +466,11 @@
       .reveal h1 { font-size: 1.7em; }
       .reveal h2 { font-size: 1.2em; }
       .reveal p, .reveal li, .reveal td, .reveal th { font-size: 0.52em; }
-      .grid-2, .grid-3, .timeline, .steps { grid-template-columns: 1fr; }
+      .grid-2, .grid-3, .timeline, .steps, .process-strip { grid-template-columns: 1fr; }
       .bar-row { grid-template-columns: 56px 1fr; }
       .bar-row .tiny { display: none; }
+      .stack-item, .sample-row { grid-template-columns: 1fr; }
+      .stack-meta, .sample-score { text-align: left; }
     }
   </style>
 </head>
@@ -494,85 +625,310 @@
       </section>
 
       <section>
-        <h2><span class="accent-c">模块 C</span> 三代策略优化算法：工程权衡</h2>
-        <p class="tiny muted">GPU 显存占用（相对值，同等模型规模）</p>
+        <h2><span class="accent-c">模块 C</span> 策略优化的演进主线：三次工程妥协</h2>
+        <p class="tiny muted">讲稿主线不是“谁绝对更强”，而是三代算法在算力硬件、数学等价性、复杂推理需求之间不断重新取舍。</p>
+        <div class="grid-3">
+          <div class="card">
+            <h3 class="accent-a">PPO：先解决“能不能稳定学”</h3>
+            <p class="tiny">保留在线强化学习的主动探索，用 Actor-Critic + KL 牵引绳确保模型别走火入魔。</p>
+            <div class="mini-pills">
+              <span class="mini-pill">4 模型驻留</span>
+              <span class="mini-pill">优势由 Critic 提供</span>
+              <span class="mini-pill">安全稳态强</span>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="accent-b">DPO：再解决“能不能便宜学”</h3>
+            <p class="tiny">利用 Bradley-Terry 偏好建模与数学等价性，直接约掉奖励模型与 Critic。</p>
+            <div class="mini-pills">
+              <span class="mini-pill">双模型瘦身</span>
+              <span class="mini-pill">离线偏好分类</span>
+              <span class="mini-pill">开源友好</span>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="accent-c">GRPO：最后解决“能不能学会深推理”</h3>
+            <p class="tiny">保留强化学习探索，同时移除 Critic，用组内相对评分与规则验证拉起长链推理。</p>
+            <div class="mini-pills">
+              <span class="mini-pill">Z-Score 相对优势</span>
+              <span class="mini-pill">可验证奖励</span>
+              <span class="mini-pill">推理任务强</span>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-c">一条清晰演化线：四模型在线 RL → 双模型离线偏好学习 → 去 Critic 的组内相对强化学习。</div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> PPO：Actor-Critic 的“双人博弈”</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-a">类比：空手道学生与教练</h3>
+            <p class="tiny">Actor 像正在练招式的学生，负责一步步生成 Token；Critic 像站在旁边的教练，不出手，但随时判断这一步比“平均水平”更好还是更差。</p>
+            <div class="mini-pills">
+              <span class="mini-pill">Actor = 生成下一个词</span>
+              <span class="mini-pill">Critic = 估计状态价值</span>
+              <span class="mini-pill">Reward Model = 终局打分</span>
+            </div>
+            <div class="callout callout-a tiny">如果退回最原始的 REINFORCE，模型必须等整段回答写完后才知道总分，方差极大，几乎无法定位“哪一步出错”。</div>
+          </div>
+          <div class="card">
+            <h3 class="accent-a">优势函数给出细粒度反馈</h3>
+            <p class="tiny">Critic 不直接告诉你最终答案，而是提供一个基线：当前这个动作，究竟比预期好多少。</p>
+            <div class="formula">$\hat{A}_t \approx r_t + \gamma V(s_{t+1}) - V(s_t)$</div>
+            <p class="tiny">当 $\hat{A}_t &gt; 0$ 时，就像教练说“这一下踢得比预想更好”，Actor 会在类似情境中提高该动作概率；反之则压低。</p>
+          </div>
+        </div>
+        <div class="process-strip">
+          <div class="process-box"><div class="k">Step 1</div><div class="v">Actor 采样整段回复，主动试错。</div></div>
+          <div class="process-box"><div class="k">Step 2</div><div class="v">Reward Model 对完整回答给终局奖励。</div></div>
+          <div class="process-box"><div class="k">Step 3</div><div class="v">Critic 估计基线并计算 Advantage。</div></div>
+          <div class="process-box"><div class="k">Step 4</div><div class="v">PPO 裁剪更新，避免策略一步跳太远。</div></div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> PPO 的精髓：KL 散度这根“隐形牵引绳”</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-d">为什么需要牵引绳</h3>
+            <p class="tiny">讲稿把模型比作赛道上的赛车。奖励就是终点奖金，但如果只追逐奖金，模型很容易奖励作弊：疯狂堆砌“谢谢您”“很荣幸”等礼貌空话，甚至输出看似高分却语法崩坏的垃圾文本。</p>
+            <div class="mini-pills">
+              <span class="mini-pill">Reward Hacking</span>
+              <span class="mini-pill">语言漂移</span>
+              <span class="mini-pill">知识遗忘风险</span>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="accent-a">KL 约束的是“别离参考模型太远”</h3>
+            <div class="formula">$\mathcal{J}_{PPO}=\mathbb{E}[r_t\hat{A}_t]-\beta D_{KL}(\pi_\theta\|\pi_{ref})$</div>
+            <p class="tiny">KL 散度衡量当前策略与初始 SFT 参考模型的分布差异。偏离人类自然语言流形越远，惩罚越大，模型就会被硬拉回正常赛道。</p>
+            <div class="callout callout-a tiny">这根牵引绳的意义是：允许模型为偏好而进化，但不允许它丢掉预训练与 SFT 阶段学到的通用语言结构和核心知识。</div>
+          </div>
+        </div>
+        <div class="process-strip" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="process-box"><div class="k">拿分冲动</div><div class="v">奖励信号诱导模型冲向更高分。</div></div>
+          <div class="process-box"><div class="k">偏离流形</div><div class="v">若策略离参考分布过远，出现奖励黑客迹象。</div></div>
+          <div class="process-box"><div class="k">KL 拉回</div><div class="v">负反馈急剧上升，抑制失控更新。</div></div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> PPO 的阿喀琉斯之踵：四模型太重</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-a">显存里同时挤着四头“巨兽”</h3>
+            <div class="stack-list">
+              <div class="stack-item">
+                <div class="stack-label">Actor</div>
+                <div class="stack-track"><div class="stack-fill" style="width: 100%; background: linear-gradient(90deg,#0e7490,#0369a1);"></div></div>
+                <div class="stack-meta">权重 + 梯度 + Adam</div>
+              </div>
+              <div class="stack-item">
+                <div class="stack-label">Critic</div>
+                <div class="stack-track"><div class="stack-fill" style="width: 96%; background: linear-gradient(90deg,#1d4ed8,#38bdf8);"></div></div>
+                <div class="stack-meta">几乎再来一套</div>
+              </div>
+              <div class="stack-item">
+                <div class="stack-label">Reward</div>
+                <div class="stack-track"><div class="stack-fill" style="width: 62%; background: linear-gradient(90deg,#f97316,#fb923c);"></div></div>
+                <div class="stack-meta">冻结但要前向</div>
+              </div>
+              <div class="stack-item">
+                <div class="stack-label">Reference</div>
+                <div class="stack-track"><div class="stack-fill" style="width: 62%; background: linear-gradient(90deg,#64748b,#94a3b8);"></div></div>
+                <div class="stack-meta">专职算 KL</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="accent-d">工程后果</h3>
+            <ul class="tiny">
+              <li>Actor 与 Critic 都要反向传播，最核心显存几乎直接翻倍。</li>
+              <li>生成阶段和优化阶段在四模型间频繁调度数据，容易出现内存碎片与通信延迟。</li>
+              <li>讲稿给出的工业级参考值是：8B 模型、20K 上下文下，标准 PPO 可轻易吃掉约 510 GB VRAM。</li>
+            </ul>
+            <div class="callout callout-d tiny">这也是为什么很长一段时间只有顶尖实验室能大规模玩转 RLHF。</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> DPO：数学等价性如何“消灭”奖励模型</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-b">第一步：BT 模型只关心赢家和输家的分差</h3>
+            <p class="tiny">在讲稿的篮球联赛类比里，我们不需要知道 A 队和 F 队每场具体得多少分，只需要一个隐藏实力值，胜率就由两者差值决定。</p>
+            <div class="formula">$$P(y_c \succ y_r \mid x)=\sigma\left(r(x,y_c)-r(x,y_r)\right)$$</div>
+            <p class="tiny">DPO 沿用了这点：chosen 比 rejected 好多少，才是人类偏好监督的核心。</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-b">第二步：最优策略把奖励写成概率比</h3>
+            <div class="formula">$$r^*(x,y)=\beta\log\frac{\pi_\theta(y|x)}{\pi_{ref}(y|x)}+\beta\log Z(x)$$</div>
+            <p class="tiny">其中 $Z(x)$ 是那个看似可怕的配分函数。关键魔法是：把它代回 BT 的“好回答减坏回答”之后，$Z(x)$ 在减法中会完全约掉。</p>
+            <div class="callout callout-b tiny">结论：策略模型本身的对数概率比，已经隐式携带了奖励信息，因此无需再单独训练庞大的 Reward Model。</div>
+          </div>
+        </div>
+        <div class="process-strip">
+          <div class="process-box"><div class="k">PPO 目标</div><div class="v">从带 KL 的奖励最大化出发。</div></div>
+          <div class="process-box"><div class="k">最优策略</div><div class="v">把最优奖励改写成策略/参考策略的对数比。</div></div>
+          <div class="process-box"><div class="k">代回 BT</div><div class="v">比较 chosen 与 rejected 的奖励差值。</div></div>
+          <div class="process-box"><div class="k">Cancel Out</div><div class="v">$Z(x)$ 被消掉，只剩可训练的分类目标。</div></div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> DPO：双模型瘦身的红利，与静态数据集的代价</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-b">工程红利：四模型直接砍半</h3>
+            <div class="process-strip" style="grid-template-columns: 1fr 1fr;">
+              <div class="process-box"><div class="k">PPO</div><div class="v">Actor + Critic + Reward + Reference</div></div>
+              <div class="process-box"><div class="k">DPO</div><div class="v">Policy + Reference</div></div>
+            </div>
+            <div class="formula">$\mathcal{L}_{DPO}=-\log\sigma\left(\beta\log\frac{\pi_\theta(y_c|x)}{\pi_{ref}(y_c|x)}-\beta\log\frac{\pi_\theta(y_r|x)}{\pi_{ref}(y_r|x)}\right)$</div>
+            <p class="tiny">无需 Rollout、无需 Critic 价值估计、无需独立奖励模型，训练被降维为偏好对上的交叉熵优化。</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-d">代价：离线学习容易过拟合</h3>
+            <ul class="tiny">
+              <li><strong>OOD 分布偏移：</strong>遇到训练集没覆盖的罕见问题，模型可能行为崩溃。</li>
+              <li><strong>奖励裕度爆炸：</strong>chosen 与 rejected 被越拉越开，模型越来越过度自信。</li>
+              <li><strong>多样性塌缩：</strong>回答风格变单一、模板化，复杂推理上限受限。</li>
+            </ul>
+            <div class="callout callout-d tiny">报告的判断很明确：DPO 在主观文本风格对齐上很强，但对需要探索的新颖推理路径，静态分类属性会成为瓶颈。</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> GRPO：为什么一定要移除 Critic</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-c">PPO 的 Critic 在长 CoT 面前很吃力</h3>
+            <p class="tiny">对于需要几十步才能得出答案的数学题，模型刚写下第一行算式时，Critic 很难精准预判它最终会不会推导正确。</p>
+            <ul class="tiny">
+              <li>长逻辑链下，早期 Token 的价值估计本身就很不稳定。</li>
+              <li>如果基础模型是 671B 级别，再维护同体量 Critic，显存和带宽会直接逼近物理极限。</li>
+            </ul>
+            <div class="callout callout-c tiny">GRPO 的核心工程壮举：保留 RL 的主动探索，但彻底删除评论家网络。</div>
+          </div>
+          <div class="card">
+            <h3 class="accent-c">替代方案：组内相对比较</h3>
+            <p class="tiny">不再依赖一个神经网络给绝对基线，而是对同一个 Prompt 并行采样一组完整推理路径，再在组内比较谁更好。</p>
+            <div class="process-strip" style="grid-template-columns: repeat(5, 1fr);">
+              <div class="process-box"><div class="k">Prompt</div><div class="v">给定同一个问题。</div></div>
+              <div class="process-box"><div class="k">Group</div><div class="v">并行采样 8 或 16 条回答。</div></div>
+              <div class="process-box"><div class="k">Verifier</div><div class="v">外部脚本给每条路径打分。</div></div>
+              <div class="process-box"><div class="k">Mean / Std</div><div class="v">计算组内均值和标准差。</div></div>
+              <div class="process-box"><div class="k">Advantage</div><div class="v">用相对分数替代 Critic 基线。</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> GRPO 的关键数学：Z-Score 相对评分</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-c">公式很简单，统计意义却极强</h3>
+            <div class="formula">$$A_i=\frac{R_i-\operatorname{mean}(R_{1..G})}{\operatorname{std}(R_{1..G})}$$</div>
+            <p class="tiny">优势不再来自 Critic 的绝对价值估计，而是来自这条轨迹相对于同组平均水平的“拉开程度”。</p>
+            <div class="sample-board">
+              <div class="sample-row">
+                <div class="sample-id">样本 A</div>
+                <div class="sample-track"><div class="sample-fill" style="width: 30%; background: linear-gradient(90deg,#94a3b8,#cbd5e1);">低于均值</div></div>
+                <div class="sample-score">18</div>
+              </div>
+              <div class="sample-row">
+                <div class="sample-id">样本 B</div>
+                <div class="sample-track"><div class="sample-fill" style="width: 43%; background: linear-gradient(90deg,#60a5fa,#93c5fd);">接近均值</div></div>
+                <div class="sample-score">26</div>
+              </div>
+              <div class="sample-row">
+                <div class="sample-id">样本 C</div>
+                <div class="sample-track"><div class="sample-fill" style="width: 52%; background: linear-gradient(90deg,#0ea5e9,#38bdf8);">均值附近</div></div>
+                <div class="sample-score">31</div>
+              </div>
+              <div class="sample-row">
+                <div class="sample-id">样本 D</div>
+                <div class="sample-track"><div class="sample-fill" style="width: 84%; background: linear-gradient(90deg,#059669,#10b981);">强正优势</div></div>
+                <div class="sample-score">50</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="accent-c">类比：大学期末考试“拉曲线”</h3>
+            <p class="tiny">如果一场《实变函数》考试极难，全班平均只有 30 分，那么 50 分虽然仍不及格，但在班里已经是极强正样本；相反，若题目很简单，全班平均 90 分，那么 80 分反而是负优势。</p>
+            <ul class="tiny">
+              <li>题目难度高低不再直接干扰梯度尺度。</li>
+              <li>同组总能分出相对更好的推理路径，避免梯度失去方向。</li>
+              <li>罕见但优秀的 CoT 会被 Z-Score 放大并固化。</li>
+            </ul>
+            <div class="callout callout-c tiny">这就是讲稿强调的“内卷式机制”：模型不是和题目难度打架，而是在自己当前能力边界上不断突围。</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> GRPO + RLVR：用纯规则奖励点燃自我进化</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-c">DeepSeek-R1-Zero 的奖励系统极其朴素</h3>
+            <div class="stack-list">
+              <div class="stack-item">
+                <div class="stack-label">准确性奖励</div>
+                <div class="stack-track"><div class="stack-fill" style="width: 100%; background: linear-gradient(90deg,#16a34a,#22c55e);"></div></div>
+                <div class="stack-meta">正确 = 1，错误 = 0</div>
+              </div>
+              <div class="stack-item">
+                <div class="stack-label">格式奖励</div>
+                <div class="stack-track"><div class="stack-fill" style="width: 78%; background: linear-gradient(90deg,#7c3aed,#a78bfa);"></div></div>
+                <div class="stack-meta">&lt;think&gt;...&lt;/think&gt;</div>
+              </div>
+            </div>
+            <p class="tiny">在数学与代码场景，很多时候几行验证脚本或形式化证明器就能替代黑盒神经奖励模型，这正是可验证奖励（RLVR）的威力。</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-c">结果：复杂推理行为从试错中涌现</h3>
+            <ul class="tiny">
+              <li><strong>Reflection：</strong>发现原路不通后主动换思路。</li>
+              <li><strong>Self-correction：</strong>意识到错误后自发回滚重算。</li>
+              <li><strong>Aha moment：</strong>长思维链中出现顿悟式跳跃。</li>
+            </ul>
+            <div class="callout callout-c tiny">讲稿的关键表述是：这些能力并不是靠人工写标准答案“教”出来的，而是在规则奖励 + GRPO 相对评分下，通过强化学习自己涌现出来的。</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> 真实的显存与算力账本</h2>
+        <p class="tiny muted">报告给出的工业参考场景：8B 参数、20K 上下文。核心差异不是抽象优劣，而是显存账本能否落地。</p>
         <div class="bars">
           <div class="bar-row">
             <div class="tiny accent-a"><strong>PPO</strong></div>
-            <div class="track"><div class="fill" style="width: 90%; background: linear-gradient(90deg,#0e7490,#0369a1);">Actor · Critic · RM · Ref</div></div>
-            <div class="tiny muted">约 4× base</div>
+            <div class="track"><div class="fill" style="width: 100%; background: linear-gradient(90deg,#0e7490,#0369a1);">约 510 GB · 4 模型同时驻留</div></div>
+            <div class="tiny muted">8 卡 H100 量级</div>
           </div>
           <div class="bar-row">
             <div class="tiny accent-b"><strong>DPO</strong></div>
-            <div class="track"><div class="fill" style="width: 44%; background: linear-gradient(90deg,#7c3aed,#8b5cf6);">Policy · Ref</div></div>
-            <div class="tiny muted">约 2× base</div>
+            <div class="track"><div class="fill" style="width: 46%; background: linear-gradient(90deg,#7c3aed,#8b5cf6);">约策略模型 2.0x · 双模型</div></div>
+            <div class="tiny muted">开源复现友好</div>
           </div>
           <div class="bar-row">
             <div class="tiny accent-c"><strong>GRPO</strong></div>
-            <div class="track"><div class="fill" style="width: 25%; background: linear-gradient(90deg,#059669,#10b981);">Policy · Ref</div></div>
-            <div class="tiny muted">约 2× base</div>
+            <div class="track"><div class="fill" style="width: 18%; background: linear-gradient(90deg,#059669,#10b981);">约 54 GB · LoRA + 检查点</div></div>
+            <div class="tiny muted">单卡 / 小集群可做</div>
           </div>
         </div>
-        <div class="callout callout-c fragment">算力紧张时，DPO/GRPO 通常比 PPO 更实用。</div>
-      </section>
-
-      <section>
-        <h2><span class="accent-c">模块 C</span> PPO：带“隐形牵引绳”的策略梯度</h2>
         <div class="grid-2">
-          <div class="card">
-            <h3 class="accent-a">Actor-Critic</h3>
-            <ul>
-              <li>Actor：当前训练中的 LLM。</li>
-              <li>Critic：估计状态价值，计算 Advantage。</li>
-              <li>Advantage &gt; 0：提高该动作概率。</li>
-            </ul>
-          </div>
-          <div class="card">
-            <h3 class="accent-d">KL 惩罚项</h3>
-            <p>防止策略偏离参考模型过远，抑制“拿分投机”。</p>
-            <div class="formula">$\mathcal{J}_{PPO}=\mathbb{E}[r_t\hat{A}_t]-\beta D_{KL}(\pi_\theta\|\pi_{ref})$</div>
-          </div>
+          <div class="callout callout-a">PPO 的高成本来自 Actor、Critic、Reward、Reference 同时在场，还要维持优化器状态和大规模激活值。</div>
+          <div class="callout callout-c">GRPO 的革命性在于：去 Critic + 规则验证替代重奖励模型，再配合 LoRA 与激活检查点，显存可压缩约 90%。</div>
         </div>
       </section>
 
       <section>
-        <h2><span class="accent-c">模块 C</span> DPO：用代数变换移除奖励模型</h2>
-        <div class="grid-2">
-          <div class="card">
-            <h3 class="accent-b">核心洞察</h3>
-            <p>把 PPO 的 KL 目标与 BT 偏好模型联立，奖励模型项可以被约去。</p>
-            <div class="formula">$r^*(x,y)=\beta\log\frac{\pi^*(y|x)}{\pi_{ref}(y|x)}+\beta\log Z(x)$</div>
-          </div>
-          <div class="card">
-            <h3 class="accent-b">DPO 损失</h3>
-            <div class="formula">$\mathcal{L}_{DPO}=-\log\sigma\left(\beta\log\frac{\pi_\theta(y_c|x)}{\pi_{ref}(y_c|x)}-\beta\log\frac{\pi_\theta(y_r|x)}{\pi_{ref}(y_r|x)}\right)$</div>
-            <p class="tiny"><strong class="accent-c">优点：</strong>显存更省，工程更轻。</p>
-            <p class="tiny"><strong class="accent-d">风险：</strong>易在偏好数据上过拟合。</p>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <h2><span class="accent-c">模块 C</span> GRPO：组内 Z-Score 优势估计</h2>
-        <div class="grid-2">
-          <div class="card">
-            <h3 class="accent-c">核心创新：去掉 Critic</h3>
-            <p>对同一问题并行采样 $G$ 条答案，用组内统计量当作基线。</p>
-            <div class="callout callout-c tiny">像“班内排名”：无论题目难度，关键是相对表现。</div>
-          </div>
-          <div class="card">
-            <h3 class="accent-c">优势函数</h3>
-            <div class="formula">$$A_i=\frac{R_i-\operatorname{mean}(R_{1..G})}{\operatorname{std}(R_{1..G})}$$</div>
-            <ul>
-              <li>$A_i&gt;0$：增大对应推理路径概率。</li>
-              <li>$A_i&lt;0$：降低对应推理路径概率。</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <h2><span class="accent-c">模块 C</span> PPO / DPO / GRPO 一表对比</h2>
+        <h2><span class="accent-c">模块 C</span> PPO / DPO / GRPO 多维深度对比</h2>
         <table>
           <thead>
             <tr>
@@ -583,13 +939,53 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>奖励模型</td><td>需要</td><td>不需要</td><td>需要（轻量）</td></tr>
-            <tr><td>Critic</td><td>需要</td><td>不需要</td><td>不需要</td></tr>
-            <tr><td>模型数量</td><td>4</td><td>2</td><td>2</td></tr>
-            <tr><td>代表应用</td><td>ChatGPT RLHF</td><td>Llama 系列偏好微调</td><td>DeepSeek-R1</td></tr>
-            <tr><td>核心优势</td><td>稳定通用</td><td>轻量易部署</td><td>推理任务表现强</td></tr>
+            <tr><td>驻留模型</td><td>Actor + Critic + Reward + Reference</td><td>Actor + Reference</td><td>Actor + Reference + 组内轨迹缓冲</td></tr>
+            <tr><td>显存量级</td><td>约策略模型 3.5 - 4.0 倍</td><td>约策略模型 2.0 倍</td><td>约策略模型 2.0 倍</td></tr>
+            <tr><td>优势来源</td><td>Critic 的绝对价值估计</td><td>无需显式 Advantage</td><td>组内 Mean / Std 的相对评估</td></tr>
+            <tr><td>探索机制</td><td>在线主动探索</td><td>离线被动学习</td><td>组内并行主动探索</td></tr>
+            <tr><td>计算热点</td><td>Critic 反向 + Rollout 调度</td><td>静态偏好对交叉熵</td><td>单个 Prompt 多样本推理与验证</td></tr>
+            <tr><td>优势场景</td><td>通用对话对齐、安全护栏、复杂指令</td><td>短文本偏好、风格微调、情感调制</td><td>数学、代码、多步长 CoT 推理</td></tr>
           </tbody>
         </table>
+        <div class="callout callout-c">一句话记忆：PPO 最稳，DPO 最省，GRPO 最适合可验证的复杂推理探索。</div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> 适用场景的二分天下</h2>
+        <div class="grid-3">
+          <div class="card">
+            <h3 class="accent-a">PPO：通用稳态底座</h3>
+            <p class="tiny">当目标是安全护栏、复杂指令遵循、通用聊天对齐时，PPO 依然是“最稳”的工程范式，只是代价极高。</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-b">DPO：主观偏好任务的统治区</h3>
+            <p class="tiny">语气、风格、同理心、安全拒答这些难以写规则评分的任务，最适合预先标注“好回答 vs 坏回答”，再做离线 DPO。</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-c">GRPO：客观推理任务的统治区</h3>
+            <p class="tiny">数学证明、算法代码、系统编程、多步逻辑链等任务更依赖主动试错与相对评分。哪怕 16 条轨迹里只有 1 条真正突破，也会被 Z-Score 放大并学进去。</p>
+          </div>
+        </div>
+        <div class="callout callout-c">报告给出的结论非常鲜明：DPO 擅长主观对齐，GRPO 擅长客观推理探索，二者不是替代关系，而是任务分工。</div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> 前沿演进：DAPO / GSPO / ES</h2>
+        <div class="grid-3">
+          <div class="card">
+            <h3 class="accent-c">DAPO：修长度偏见</h3>
+            <p class="tiny">GRPO 会诱导模型通过“过短但不完整”的答案投机。DAPO 用不对称裁剪（Asymmetric Clip）和动态采样 / 截断屏蔽，逼模型靠真正的长逻辑链拿分，而不是靠偷步数。</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-b">GSPO：从 Token 提升到 Sequence</h3>
+            <p class="tiny">MoE 模型里，Token 级重要性采样方差很高。GSPO 把优化颗粒度抬到完整序列，更贴近“最终答案拿奖励”的本质，也更适配 MoE。</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-d">ES：无梯度黑盒路线</h3>
+            <p class="tiny">进化策略把模型看成黑箱：给权重注入高斯噪声，繁衍出一群子模型，只做前向评估，再聚合优胜变异方向更新。好处是几乎不吃反向传播显存，并且天然适合超大规模并行。</p>
+          </div>
+        </div>
+        <div class="callout callout-b">趋势不是追单一算法的绝对最优，而是围绕“任务类型 + 硬件边界 + 模型结构”寻找组合工程最优。</div>
       </section>
 
       <section>
