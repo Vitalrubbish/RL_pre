@@ -1,3 +1,4 @@
 .env
 .claude
 local/
+.DS_Store
