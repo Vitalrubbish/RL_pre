@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模块 A · 对齐工程基础与文本生成的马尔可夫决策过程</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/white.min.css">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    :root {
+      --ink: #12343b;
+      --ink-soft: #4b6670;
+      --sand: #f8f4e6;
+      --paper: #fffdf8;
+      --line: #d9d2bc;
+      --a: #0e7490;
+      --b: #8b5cf6;
+      --c: #059669;
+      --d: #dc2626;
+      --warn: #f97316;
+      --gold: #b45309;
+    }
+
+    .reveal {
+      font-family: "Noto Sans SC", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, #fff6de 0%, transparent 45%),
+        radial-gradient(circle at 92% 85%, #dff7ff 0%, transparent 42%),
+        linear-gradient(120deg, #f7f1dc 0%, #fbf8ef 45%, #f2f8f9 100%);
+    }
+
+    .reveal .slides {
+      text-align: left;
+    }
+
+    .reveal section {
+      padding: 20px 10px;
+    }
+
+    .reveal h1,
+    .reveal h2,
+    .reveal h3 {
+      text-transform: none;
+      letter-spacing: 0;
+      margin: 0 0 0.35em;
+      color: var(--ink);
+    }
+
+    .reveal h1 {
+      font-family: "ZCOOL XiaoWei", serif;
+      font-size: 2.35em;
+      line-height: 1.18;
+    }
+
+    .reveal h2 {
+      font-size: 1.45em;
+      font-weight: 900;
+    }
+
+    .reveal h3 {
+      font-size: 0.84em;
+      font-weight: 700;
+      color: var(--ink-soft);
+      margin-top: 0.6em;
+    }
+
+    .reveal p,
+    .reveal li,
+    .reveal td,
+    .reveal th {
+      font-size: 0.58em;
+      line-height: 1.58;
+      color: var(--ink);
+    }
+
+    .muted {
+      color: var(--ink-soft);
+    }
+
+    .tiny {
+      font-size: 0.48em;
+    }
+
+    .chip {
+      display: inline-block;
+      margin-right: 8px;
+      margin-top: 8px;
+      padding: 4px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-size: 0.39em;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--ink-soft);
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .chip-a { border-color: rgba(14, 116, 144, 0.35); color: var(--a); }
+    .chip-b { border-color: rgba(139, 92, 246, 0.35); color: var(--b); }
+    .chip-c { border-color: rgba(5, 150, 105, 0.35); color: var(--c); }
+    .chip-d { border-color: rgba(220, 38, 38, 0.35); color: var(--d); }
+
+    .hero {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.58);
+      box-shadow: 0 20px 50px rgba(18, 52, 59, 0.08);
+      padding: 34px 38px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.72);
+      padding: 12px 14px;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 0.35em;
+    }
+
+    .accent-a { color: var(--a); }
+    .accent-b { color: var(--b); }
+    .accent-c { color: var(--c); }
+    .accent-d { color: var(--d); }
+
+    .callout {
+      margin-top: 10px;
+      border-left: 4px solid;
+      border-radius: 0 10px 10px 0;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .callout-a { border-color: var(--a); }
+    .callout-b { border-color: var(--b); }
+    .callout-c { border-color: var(--c); }
+    .callout-d { border-color: var(--d); }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .slot {
+      border-radius: 12px;
+      border: 1px solid;
+      padding: 10px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .slot .m {
+      font-size: 0.4em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      opacity: 0.86;
+    }
+
+    .slot .t {
+      font-size: 0.98em;
+      font-weight: 900;
+      line-height: 1.1;
+      margin: 0.08em 0;
+    }
+
+    .slot .d {
+      font-size: 0.42em;
+      line-height: 1.45;
+    }
+
+    .slot-a { border-color: rgba(14, 116, 144, 0.3); color: var(--a); }
+    .slot-b { border-color: rgba(139, 92, 246, 0.3); color: var(--b); }
+    .slot-c { border-color: rgba(5, 150, 105, 0.3); color: var(--c); }
+    .slot-d { border-color: rgba(220, 38, 38, 0.3); color: var(--d); }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .step {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.72);
+      padding: 11px;
+      text-align: center;
+    }
+
+    .step .tag {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      margin-bottom: 5px;
+      font-size: 0.55em;
+    }
+
+    .formula {
+      font-size: 0.56em;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.68);
+      padding: 8px 12px;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .bars {
+      margin-top: 8px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 64px 1fr 128px;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+    }
+
+    .track {
+      height: 22px;
+      border-radius: 8px;
+      background: rgba(18, 52, 59, 0.08);
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding-left: 8px;
+      color: #fff;
+      font-size: 0.36em;
+      font-weight: 700;
+    }
+
+    pre {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.34em;
+      line-height: 1.58;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #d5e0e6;
+      background: #f8fcff;
+      color: #173942;
+      box-shadow: none;
+    }
+
+    code {
+      font-family: "JetBrains Mono", monospace;
+      color: #0f4c5c;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      background: rgba(255, 255, 255, 0.72);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #e4deca;
+      padding: 7px 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: rgba(18, 52, 59, 0.06);
+      font-weight: 800;
+      color: var(--ink-soft);
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .qa {
+      text-align: center;
+      font-size: 2.5em;
+      font-weight: 900;
+      margin-top: 0.08em;
+      color: transparent;
+      background-image: linear-gradient(120deg, var(--a), var(--b), var(--c));
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .reveal .progress {
+      height: 4px;
+      background: rgba(18, 52, 59, 0.1);
+    }
+
+    .reveal .progress span {
+      background: linear-gradient(90deg, var(--a), var(--b), var(--c));
+    }
+
+    .reveal .slide-number {
+      color: var(--ink-soft);
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.72);
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid #d6ddde;
+    }
+
+    .versus {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .versus .vs-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+      font-weight: 900;
+      color: var(--warn);
+    }
+
+    .quote-box {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.72);
+      padding: 14px 16px;
+      font-size: 0.52em;
+      line-height: 1.7;
+      position: relative;
+    }
+
+    .quote-box::before {
+      content: "\201C";
+      font-size: 2.4em;
+      color: var(--line);
+      position: absolute;
+      top: 2px;
+      left: 8px;
+      line-height: 1;
+    }
+
+    .quote-box .qt {
+      padding-left: 18px;
+    }
+
+    .icon-row {
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .icon-item {
+      text-align: center;
+      flex: 1;
+      max-width: 200px;
+    }
+
+    .icon-item .icon-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5em;
+      margin-bottom: 6px;
+    }
+
+    .bike-analogy {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 14px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .bike-analogy .arrow {
+      font-size: 1.6em;
+      color: var(--warn);
+      font-weight: 900;
+    }
+
+    @media (max-width: 900px) {
+      .reveal h1 { font-size: 1.7em; }
+      .reveal h2 { font-size: 1.2em; }
+      .reveal p, .reveal li, .reveal td, .reveal th { font-size: 0.52em; }
+      .grid-2, .grid-3, .timeline, .steps { grid-template-columns: 1fr; }
+      .versus { grid-template-columns: 1fr; }
+      .bar-row { grid-template-columns: 56px 1fr; }
+      .bar-row .tiny { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============ Slide 1: 封面 ============ -->
+      <section>
+        <div class="hero">
+          <h1>对齐工程基础<br>与文本生成的马尔可夫决策过程</h1>
+          <p class="muted">模块 A &middot; 预估时长 10-13 分钟</p>
+          <div>
+            <span class="chip chip-a">SFT 行为克隆</span>
+            <span class="chip chip-a">暴露偏差</span>
+            <span class="chip chip-a">马尔可夫链 &rarr; MDP</span>
+            <span class="chip chip-a">稀疏奖励</span>
+          </div>
+          <p class="tiny muted" style="margin-top: 18px;">大语言模型对齐技术系列 &middot; 组员 A</p>
+        </div>
+      </section>
+
+      <!-- ============ Slide 2: 互动投票引入 ============ -->
+      <section>
+        <h2><span class="accent-a">互动投票</span> 哪个 AI 回答更好？</h2>
+        <p class="muted tiny">场景：你向一个千亿参数模型提问"请解释海森堡不确定性原理"</p>
+        <div class="versus">
+          <div class="quote-box fragment fade-right" style="border-left: 4px solid var(--d);">
+            <div class="qt">
+              <strong class="accent-d">回答 A</strong><br>
+              "连这都不懂吗？海森堡不确定性原理指出，粒子的位置和动量不可能同时被精确测量，必须满足 $\Delta x \Delta p \geq \frac{\hbar}{2}$。这么基础的物理常识，建议你先去读读本科教材，别浪费算力。"
+            </div>
+            <p class="tiny muted" style="margin-top:6px;">事实精准，但语气傲慢甚至有攻击性</p>
+          </div>
+          <div class="vs-label">VS</div>
+          <div class="quote-box fragment fade-left" style="border-left: 4px solid var(--c);">
+            <div class="qt">
+              <strong class="accent-c">回答 B</strong><br>
+              "非常荣幸为您解答！简单来说，当我们观察粒子时，不可避免地会干扰到它的运动，也就是所谓的'观察者效应'，所以无法同时测准位置和速度。希望对您有所启发！"
+            </div>
+            <p class="tiny muted" style="margin-top:6px;">语气友好，但混淆了不确定性原理与观察者效应</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Slide 3: 投票揭晓 ============ -->
+      <section>
+        <h2><span class="accent-a">投票揭晓</span> 真实的行业痛点</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-d">回答 A 的问题</h3>
+            <p>事实极其精准，但语气傲慢，甚至带有攻击性。<br>用户体验极差。</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-c">回答 B 的问题</h3>
+            <p>语气极度礼貌谦卑，但犯了经典科学常识错误&mdash;&mdash;把不确定性原理与"观察者效应"混为一谈。</p>
+          </div>
+        </div>
+        <div class="callout callout-a fragment">
+          <strong>"礼貌悖论"：</strong>研究发现，使用粗鲁提示词时 AI 准确率反而更高&mdash;&mdash;因为过多客套话在概率系统里引入了噪音，稀释了核心指令。
+        </div>
+        <div class="callout callout-d fragment">
+          这正是<strong>对齐（Alignment）</strong>的主观性与困难所在：让千亿参数的概率机器变得"有用、诚实且无害"，充满了妥协与博弈。
+        </div>
+      </section>
+
+      <!-- ============ Slide 4: HHH 原则 ============ -->
+      <section>
+        <h2><span class="accent-a">对齐的目标</span> HHH 原则</h2>
+        <div class="grid-3">
+          <div class="card fragment fade-up" style="text-align:center;">
+            <div style="font-size:2em; margin-bottom:4px;">H</div>
+            <h3 class="accent-a">Helpful</h3>
+            <p>有用&mdash;&mdash;能准确理解并高效回应用户需求</p>
+          </div>
+          <div class="card fragment fade-up" style="text-align:center;">
+            <div style="font-size:2em; margin-bottom:4px;">H</div>
+            <h3 class="accent-c">Honest</h3>
+            <p>诚实&mdash;&mdash;不编造事实、不夸大能力、承认不确定性</p>
+          </div>
+          <div class="card fragment fade-up" style="text-align:center;">
+            <div style="font-size:2em; margin-bottom:4px;">H</div>
+            <h3 class="accent-d">Harmless</h3>
+            <p>无害&mdash;&mdash;拒绝有害请求，不产生歧视、偏见或危险内容</p>
+          </div>
+        </div>
+        <div class="callout callout-a fragment" style="margin-top:14px;">
+          AI 本身不懂什么是"礼貌"或"正确"。对齐工程的使命，就是将这些<strong>人类价值观</strong>注入到概率模型中。
+        </div>
+      </section>
+
+      <!-- ============ Slide 5: 模块 A 路线图 ============ -->
+      <section>
+        <h2><span class="accent-a">模块 A</span> 内容路线图</h2>
+        <div class="grid-3">
+          <div class="slot slot-a" style="padding:14px;">
+            <div class="m">Part 1</div>
+            <div class="t" style="font-size:0.8em;">SFT</div>
+            <div class="d">从"词语接龙"到"有用助手"<br>监督微调的理论基础</div>
+          </div>
+          <div class="slot slot-a" style="padding:14px;">
+            <div class="m">Part 2</div>
+            <div class="t" style="font-size:0.8em;">SFT 局限</div>
+            <div class="d">行为克隆的三大瓶颈<br>为什么必须引入 RL</div>
+          </div>
+          <div class="slot slot-a" style="padding:14px;">
+            <div class="m">Part 3</div>
+            <div class="t" style="font-size:0.8em;">MDP</div>
+            <div class="d">马尔可夫链 &rarr; MDP<br>文本生成的数学形式化</div>
+          </div>
+        </div>
+        <div class="callout callout-a fragment" style="margin-top:14px;">
+          <strong>核心问题：</strong>预训练模型坐拥海量知识，为何不能直接成为好助手？如何用数学将"生成文本"变成可优化的问题？
+        </div>
+      </section>
+
+      <!-- ============ Slide 6: 预训练的本质 ============ -->
+      <section>
+        <h2><span class="accent-a">Part 1</span> 预训练：一个"通用文档补全器"</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-a">预训练目标</h3>
+            <p>核心目标只有一个：<strong>预测下一个词（Next-Token Prediction）</strong></p>
+            <p>数千万美元 + 数万张 GPU + 互联网几乎所有文本 &rarr; 忠实地模仿互联网文本的概率分布</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-d">致命问题</h3>
+            <p>它是"文档补全器"，不是"助手"。</p>
+            <div class="callout callout-d tiny" style="margin-top:6px;">
+              问："如何写一封请假信？"<br>
+              Base 模型回答："如何写一封辞职信？"<br>
+              &mdash;&mdash;它在模仿论坛里的"同问"帖，而非给出标准答案
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-a fragment">
+          预训练 &ne; 对话能力。模型只学会了"接龙"，没有学会"回答"。
+        </div>
+      </section>
+
+      <!-- ============ Slide 7: SFT 理论 ============ -->
+      <section>
+        <h2><span class="accent-a">Part 1</span> 监督微调（SFT）：行为克隆</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-a">SFT 是什么？</h3>
+            <p><strong>监督微调（Supervised Fine-Tuning）</strong> = 行为克隆 / 模仿学习</p>
+            <ul>
+              <li class="fragment">人类专家手写数万个高质量"提示词-回复"对</li>
+              <li class="fragment">计算模型预测分布与"黄金标准"答案之间的误差</li>
+              <li class="fragment">通过密集的词级别监督信号，最小化损失函数</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 class="accent-b">数学本质</h3>
+            <div class="formula">
+              $\mathcal{L}_{SFT} = -\sum_{t=1}^{T} \log \pi_\theta(y_t^* \mid x, y_{&lt;t}^*)$
+            </div>
+            <p class="tiny" style="margin-top:8px;"><strong>交叉熵损失（Cross-Entropy Loss）：</strong>衡量模型预测的下一个 Token 分布与人类标注之间的距离。</p>
+            <div class="callout callout-c tiny fragment" style="margin-top:8px;">
+              效果：模型被强行"拉"到人类对话轨道上&mdash;&mdash;学会了对话格式，遇到提问时给出答案，而非跟着一起提问。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Slide 8: SFT 局限性总览 ============ -->
+      <section>
+        <h2><span class="accent-a">Part 2</span> SFT 的三大致命局限</h2>
+        <p class="muted tiny">SFT 给了模型对话的"外壳"，却没有赋予它探索真理和自我纠错的"灵魂"</p>
+        <div class="grid-3">
+          <div class="card fragment fade-up">
+            <h3 class="accent-d">局限 1</h3>
+            <p><strong>只见"好"，不知"坏"</strong></p>
+            <p class="tiny">模型只学过完美答案，从未见过坏答案，更不知道坏在哪里。</p>
+          </div>
+          <div class="card fragment fade-up">
+            <h3 class="accent-d">局限 2</h3>
+            <p><strong>暴露偏差 &amp; 误差级联</strong></p>
+            <p class="tiny">训练时有"老师"保驾护航，推理时独自面对错误越走越偏。</p>
+          </div>
+          <div class="card fragment fade-up">
+            <h3 class="accent-d">局限 3</h3>
+            <p><strong>分布偏移 &rarr; 生搬硬套</strong></p>
+            <p class="tiny">超出训练数据覆盖范围时，模型为了"看起来专业"而硬拼概念。</p>
+          </div>
+        </div>
+        <div class="callout callout-a fragment" style="margin-top:12px;">
+          要让 AI 真正学会在试错中掌握平衡，我们必须引入<strong>强化学习（RL）</strong>。
+        </div>
+      </section>
+
+      <!-- ============ Slide 9: 局限 1 - 只见好不知坏 ============ -->
+      <section>
+        <h2><span class="accent-a">局限 1</span> 模仿学习：模型不知"坏"为何物</h2>
+        <div class="bike-analogy">
+          <div class="card" style="text-align:center;">
+            <h3 class="accent-a">SFT 的做法</h3>
+            <p style="font-size:0.65em;">把你绑在椅子上，让你看了<strong>一万小时</strong>专业运动员完美骑行的录像。</p>
+            <p class="tiny muted">你只见过平衡状态</p>
+          </div>
+          <div class="arrow">&rarr;</div>
+          <div class="card" style="text-align:center;">
+            <h3 class="accent-d">缺失的关键</h3>
+            <p style="font-size:0.65em;">你从来没有自己上车<strong>摔过几跤</strong>，不知道快要摔倒时如何"纠偏"。</p>
+            <p class="tiny muted">无法处理失衡状态</p>
+          </div>
+        </div>
+        <div class="callout callout-d fragment" style="margin-top:14px;">
+          SFT 训练数据中只有"完美正确答案"，模型从未见过"坏答案"，更不知道坏答案到底坏在哪里。
+        </div>
+        <div class="callout callout-c fragment">
+          强化学习的核心优势：让模型在探索中同时学到"什么是好"和"什么是坏"。
+        </div>
+      </section>
+
+      <!-- ============ Slide 10: 局限 2 - 暴露偏差 ============ -->
+      <section>
+        <h2><span class="accent-a">局限 2</span> 暴露偏差（Exposure Bias）</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-c">训练时：Teacher Forcing</h3>
+            <p>模型每预测下一个词，都是在人类提供的<strong>"完美前文"</strong>基础上进行的。</p>
+            <p class="tiny muted">老师始终在旁边保驾护航，营造了虚假的舒适区。</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-d">推理时：无人指导</h3>
+            <p>老师不见了。模型必须基于<strong>自己刚刚生成的、可能带有瑕疵的上下文</strong>继续生成。</p>
+            <p class="tiny muted">从来没见过自己犯错的状态。</p>
+          </div>
+        </div>
+        <div class="callout callout-d fragment" style="margin-top:12px;">
+          <strong>误差级联：</strong>一旦在长文本开头出现了一个小偏差，模型不仅不会纠正，反而会顺着错误越走越偏，最终导致严重的"幻觉"或胡言乱语。
+        </div>
+        <div class="formula fragment">
+          训练分布：$P_{data}(y_{&lt;t})$ &nbsp;&nbsp;&ne;&nbsp;&nbsp; 推理分布：$P_{\theta}(y_{&lt;t})$
+          &nbsp;&nbsp;&rArr;&nbsp;&nbsp; <strong>分布不匹配 &rarr; 误差逐步放大</strong>
+        </div>
+      </section>
+
+      <!-- ============ Slide 11: 局限 3 - 分布偏移 ============ -->
+      <section>
+        <h2><span class="accent-a">局限 3</span> 分布偏移：知识降级与生搬硬套</h2>
+        <div class="card">
+          <h3 class="accent-d">当问题超出 SFT 数据覆盖范围时</h3>
+          <p>模型为了维持一种<strong>"表面上看起来很专业"</strong>的回答格式，会生搬硬套地把预训练中的相似概念拼接在一起&mdash;&mdash;即便逻辑根本不通。</p>
+        </div>
+        <div class="grid-2 fragment" style="margin-top:12px;">
+          <div class="callout callout-d">
+            <strong>知识降级：</strong>SFT 的格式训练"覆盖"了预训练阶段习得的部分深层知识，模型变得"格式正确但内容空洞"。
+          </div>
+          <div class="callout callout-a">
+            <strong>核心矛盾：</strong>SFT 给了模型对话的"外壳"，却没有赋予它探索真理和自我纠错的"灵魂"。
+          </div>
+        </div>
+        <div class="hero center fragment" style="padding:14px; margin-top:12px;">
+          <p style="font-size:0.75em; font-weight:700; color:var(--a);">解决方案：引入强化学习（RL）&mdash;&mdash;让模型在试错中学会骑车</p>
+          <p class="tiny muted">而将文本生成变成 RL 问题的第一步，就是 MDP 形式化</p>
+        </div>
+      </section>
+
+      <!-- ============ Slide 12: 马尔可夫链 ============ -->
+      <section>
+        <h2><span class="accent-a">Part 3</span> 基础：马尔可夫链（Markov Chain）</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-a">核心性质</h3>
+            <p><strong>马尔可夫性质：</strong>系统的下一个状态，<strong>只取决于当前状态</strong>，与过去的历史轨迹完全无关。</p>
+            <div class="formula">$P(S_{t+1} \mid S_t, S_{t-1}, \dots, S_0) = P(S_{t+1} \mid S_t)$</div>
+            <p class="tiny muted" style="margin-top:6px;">"既往不咎，只看当下" &mdash;&mdash; 俄罗斯数学家安德雷&middot;马尔可夫</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-b">局限性</h3>
+            <p>马尔可夫链描述的是一个"随波逐流"的<strong>自然过程</strong>（如天气晴雨变化）。</p>
+            <p>但在文本生成中，AI 是有<strong>主观能动性</strong>的&mdash;&mdash;我们需要引导它做出"好"的选择。</p>
+            <div class="callout callout-a tiny fragment" style="margin-top:6px;">
+              解决方案：在马尔可夫链框架上加入<strong>"动作"和"奖励"</strong>机制 &rarr; 升级为 MDP
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Slide 13: MDP 总览 ============ -->
+      <section>
+        <h2><span class="accent-a">Part 3</span> 马尔可夫决策过程（MDP）</h2>
+        <p class="muted tiny">马尔可夫链 + 动作 + 奖励 = 能够做决策的智能系统</p>
+        <div class="steps">
+          <div class="step fragment fade-up">
+            <div class="tag" style="background: rgba(14,116,144,0.2); color: var(--a);">S</div>
+            <p class="tiny"><strong>状态 State</strong><br>Prompt + 已生成 Token 序列</p>
+          </div>
+          <div class="step fragment fade-up">
+            <div class="tag" style="background: rgba(139,92,246,0.2); color: var(--b);">A</div>
+            <p class="tiny"><strong>动作 Action</strong><br>从词表中选下一个 Token</p>
+          </div>
+          <div class="step fragment fade-up">
+            <div class="tag" style="background: rgba(5,150,105,0.2); color: var(--c);">P</div>
+            <p class="tiny"><strong>转移 Transition</strong><br>确定性：旧上文 + 新词</p>
+          </div>
+          <div class="step fragment fade-up">
+            <div class="tag" style="background: rgba(220,38,38,0.2); color: var(--d);">R</div>
+            <p class="tiny"><strong>奖励 Reward</strong><br>EOS 后全局稀疏奖励</p>
+          </div>
+        </div>
+        <div class="callout callout-a fragment" style="margin-top:14px;">
+          <strong>类比超级玛丽：</strong>状态 = 屏幕像素，动作 = 按手柄，奖励 = 吃金币。<br>
+          LLM：词表就是按键空间，生成一个词就是按一次键。
+        </div>
+      </section>
+
+      <!-- ============ Slide 14: MDP 详解 - 状态与动作 ============ -->
+      <section>
+        <h2><span class="accent-a">MDP 详解</span> 状态空间与动作空间</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-a">状态空间 (State)</h3>
+            <p>当前时刻的状态 = 用户 Prompt + 已生成的所有上文 Token 序列</p>
+            <div class="formula">$s_t = (x, y_1, y_2, \dots, y_{t-1})$</div>
+            <div class="callout callout-a tiny fragment">
+              Transformer 的注意力机制看到前面所有词 &rarr; "当前状态"已浓缩所有历史记忆，<strong>完美符合马尔可夫性质</strong>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="accent-b">动作空间 (Action)</h3>
+            <p>模型的"动作" = 从词表中选择下一个要输出的 Token</p>
+            <div class="hero center" style="padding:10px; margin-top:8px;">
+              <p style="font-size:0.85em; font-weight:900; color:var(--b);">Llama 3 词表：128,000</p>
+              <p class="tiny muted">每输出一个字 = 12.8 万选 1 的动作决策</p>
+            </div>
+            <p class="tiny muted fragment">这是一个极其庞大的动作迷宫</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Slide 15: MDP 详解 - 转移与奖励 ============ -->
+      <section>
+        <h2><span class="accent-a">MDP 详解</span> 转移函数与奖励函数</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-c">转移函数 (Transition)</h3>
+            <p>与机器人走路会遇到打滑等随机环境不同，文本生成的状态转移是 <strong>100% 完全确定性</strong>的。</p>
+            <div class="formula">$s_{t+1} = (s_t, a_t) = (x, y_1, \dots, y_{t-1}, y_t)$</div>
+            <div class="callout callout-c tiny fragment">
+              确定性意味着：任何逻辑断裂或幻觉，都纯粹是<strong>模型自己的策略问题</strong>，不能甩锅给环境噪音。
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="accent-d">奖励函数 (Reward) &mdash; 最困难的部分</h3>
+            <p>生成文本通常只有在输出 <strong>EOS Token</strong> 时，才获得一次全局评分。</p>
+            <div class="formula">
+              $R(s_t, a_t) = \begin{cases} 0 & \text{if } a_t \neq \text{EOS} \\ r(x, y_{1:T}) & \text{if } a_t = \text{EOS} \end{cases}$
+            </div>
+            <p class="tiny muted fragment" style="margin-top:6px;"><strong>稀疏奖励：</strong>1000 字的文章，第 200 字写错了，只在最后给一个低分&mdash;&mdash;算法很难定位到底错在哪一步。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Slide 16: 稀疏奖励与PRM ============ -->
+      <section>
+        <h2><span class="accent-a">前沿方向</span> 从稀疏奖励到过程奖励模型（PRM）</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-d">稀疏奖励的痛点</h3>
+            <p>传统方式：只在整句话或整篇文章完全结束后，才给一次全局评分。</p>
+            <ul>
+              <li class="fragment">1000 字文章，第 200 字出错 &rarr; 最后才给低分</li>
+              <li class="fragment">算法无法定位具体哪一步出了错</li>
+              <li class="fragment">信用分配（Credit Assignment）极其困难</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 class="accent-c">过程奖励模型（PRM）</h3>
+            <p>业界前沿研究方向：为每一步推理都打分。</p>
+            <div class="grid-3 fragment" style="margin-top:8px;">
+              <div style="text-align:center; padding:6px; border:1px solid var(--line); border-radius:8px;">
+                <p class="tiny"><strong>Step 1</strong><br>问题拆解<br><span class="accent-c">+0.8</span></p>
+              </div>
+              <div style="text-align:center; padding:6px; border:1px solid var(--line); border-radius:8px;">
+                <p class="tiny"><strong>Step 2</strong><br>公式推导<br><span class="accent-c">+0.9</span></p>
+              </div>
+              <div style="text-align:center; padding:6px; border:1px solid var(--line); border-radius:8px;">
+                <p class="tiny"><strong>Step 3</strong><br>数值计算<br><span class="accent-d">-0.3</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="callout callout-a fragment" style="margin-top:12px;">
+          PRM 将稀疏奖励变为密集奖励，让算法能精准定位推理链中的每一步好坏。
+        </div>
+      </section>
+
+      <!-- ============ Slide 17: MDP 全景总结 ============ -->
+      <section>
+        <h2><span class="accent-a">总结</span> 文本生成 MDP 全景图</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>MDP 要素</th>
+              <th>超级玛丽</th>
+              <th>大语言模型</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="accent-a"><strong>状态 S</strong></td>
+              <td>屏幕像素</td>
+              <td>Prompt + 已生成 Token 序列</td>
+            </tr>
+            <tr>
+              <td class="accent-b"><strong>动作 A</strong></td>
+              <td>按手柄按键</td>
+              <td>从 12.8 万词表中选一个 Token</td>
+            </tr>
+            <tr>
+              <td class="accent-c"><strong>转移 P</strong></td>
+              <td>有随机性（打滑、敌人）</td>
+              <td>100% 确定性（旧上文 + 新词）</td>
+            </tr>
+            <tr>
+              <td class="accent-d"><strong>奖励 R</strong></td>
+              <td>每秒得分（密集）</td>
+              <td>EOS 后全局评分（稀疏）</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout callout-a fragment" style="margin-top:12px;">
+          通过 MDP 形式化，LLM 从"词语接龙"的补全器，变成了在 12.8 万个岔路口的迷宫中，每走一步都寻找"最高分路径"的<strong>智能体</strong>。
+        </div>
+      </section>
+
+      <!-- ============ Slide 18: 过渡与提问 ============ -->
+      <section>
+        <h2><span class="accent-a">过渡</span> 奖励从何而来？</h2>
+        <div class="hero center" style="padding:24px;">
+          <p style="font-size:0.8em; line-height:1.8;">
+            MDP 中指引 AI 走向最高分路径的<strong>"奖励（Reward）"</strong>究竟从何而来？<br><br>
+            文章写得好不好、语气够不够礼貌，<br>
+            充满了我们开场投票的那种<strong>主观冲突</strong>。
+          </p>
+        </div>
+        <div class="grid-2 fragment" style="margin-top:14px;">
+          <div class="callout callout-d">
+            我们不可能雇几万个人类，24 小时实时坐在电脑前给 AI 吐出的每一个词打分。
+          </div>
+          <div class="callout callout-b">
+            如何将复杂的人类伦理、主观偏好<strong>压缩成一段能自动运行的代码</strong>？<br>
+            &rarr; 奖励模型（Reward Modeling）
+          </div>
+        </div>
+        <div class="hero center fragment" style="padding:16px; margin-top:14px;">
+          <p style="font-size:0.75em; font-weight:700; color:var(--b);">接下来 &rarr; 模块 B：用 Bradley-Terry 模型量化人类价值观</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/math/math.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/highlight/highlight.min.js"></script>
+
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      progress: true,
+      controls: true,
+      controlsLayout: "bottom-right",
+      transition: "slide",
+      backgroundTransition: "fade",
+      center: false,
+      margin: 0.05,
+      width: 1366,
+      height: 768,
+      plugins: [RevealMath.MathJax3, RevealHighlight],
+      mathjax3: {
+        tex: {
+          inlineMath: [["$", "$"], ["\\(", "\\)"]],
+          displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+        }
+      }
+    });
+  </script>
+</body>
+</html>
