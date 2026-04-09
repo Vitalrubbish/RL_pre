@@ -389,6 +389,24 @@
       font-weight: 800;
     }
 
+    .figure-frame {
+      margin-top: 8px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 16px 40px rgba(18, 52, 59, 0.08);
+    }
+
+    .figure-frame img {
+      display: block;
+      width: 100%;
+      max-height: 72vh;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #fff;
+    }
+
     pre {
       font-family: "JetBrains Mono", monospace;
       font-size: 0.34em;
@@ -625,42 +643,36 @@
       </section>
 
       <section>
-        <h2><span class="accent-c">模块 C</span> 策略优化的演进主线：三次工程妥协</h2>
-        <p class="tiny muted">讲稿主线不是“谁绝对更强”，而是三代算法在算力硬件、数学等价性、复杂推理需求之间不断重新取舍。</p>
-        <div class="grid-3">
+        <h2><span class="accent-c">模块 C</span> REINFORCE：策略梯度的起点</h2>
+        <p class="tiny muted">Williams 在 1992 年提出的经典策略梯度算法。全称是 REward Increment = Nonnegative Factor × Offset Reinforcement × Characteristic Eligibility</p>
+        <div class="grid-2">
           <div class="card">
-            <h3 class="accent-a">PPO：先解决“能不能稳定学”</h3>
-            <p class="tiny">保留在线强化学习的主动探索，用 Actor-Critic + KL 牵引绳确保模型别走火入魔。</p>
-            <div class="mini-pills">
-              <span class="mini-pill">4 模型驻留</span>
-              <span class="mini-pill">优势由 Critic 提供</span>
-              <span class="mini-pill">安全稳态强</span>
-            </div>
+            <h3 class="accent-a">核心思想：趋利避害</h3>
+            <p class="tiny">模型先按当前概率分布去“试一把”。如果这一整条行为链最后结果很好，就把这条路上出现过的动作整体往上推；如果结果很差，就整体往下压。它不是先知道正确答案，而是靠“试错后的奖惩”慢慢形成偏好。</p>
+            <div class="callout callout-a tiny">可以把回报理解成一个放大器：结果越好，推动越强；结果越差，抑制越强。</div>
           </div>
           <div class="card">
-            <h3 class="accent-b">DPO：再解决“能不能便宜学”</h3>
-            <p class="tiny">利用 Bradley-Terry 偏好建模与数学等价性，直接约掉奖励模型与 Critic。</p>
-            <div class="mini-pills">
-              <span class="mini-pill">双模型瘦身</span>
-              <span class="mini-pill">离线偏好分类</span>
-              <span class="mini-pill">开源友好</span>
-            </div>
-          </div>
-          <div class="card">
-            <h3 class="accent-c">GRPO：最后解决“能不能学会深推理”</h3>
-            <p class="tiny">保留强化学习探索，同时移除 Critic，用组内相对评分与规则验证拉起长链推理。</p>
-            <div class="mini-pills">
-              <span class="mini-pill">Z-Score 相对优势</span>
-              <span class="mini-pill">可验证奖励</span>
-              <span class="mini-pill">推理任务强</span>
-            </div>
+            <h3 class="accent-b">关键观念：优化“动作概率”</h3>
+            <p class="tiny">REINFORCE 不是去记某一步的固定答案，而是调整“在某种情境下选某个动作的概率”。最终高回报的轨迹，会让模型更倾向于复现类似选择；低回报轨迹，则会让这些选择变得不那么容易再次发生。</p>
+            <div class="callout callout-b tiny">所以它是策略梯度的起点：直接优化策略本身，而不是先学一个值表再间接决策。</div>
           </div>
         </div>
-        <div class="callout callout-c">一条清晰演化线：四模型在线 RL → 双模型离线偏好学习 → 去 Critic 的组内相对强化学习。</div>
+        <div class="process-strip">
+          <div class="process-box"><div class="k">先尝试</div><div class="v">按当前策略完整执行一局，先把整条轨迹走完。</div></div>
+          <div class="process-box"><div class="k">再结算</div><div class="v">等结束后看这局总体表现，到底赚了还是亏了。</div></div>
+          <div class="process-box"><div class="k">整体调概率</div><div class="v">结果好，就提高这条轨迹上动作再次出现的概率；结果差，就反过来压低。</div></div>
+          <div class="process-box"><div class="k">暴露问题</div><div class="v">因为它只能事后统一结算，所以容易“好坏一起奖惩”，这正是后来需要 baseline 和 Critic 的原因。</div></div>
+        </div>
       </section>
 
       <section>
-        <h2><span class="accent-c">模块 C</span> PPO：Actor-Critic 的“双人博弈”</h2>
+        <div class="figure-frame">
+          <img src="../assets/reinforce.png" alt="REINFORCE 时序图">
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="accent-c">模块 C</span> PPO：用 Actor-Critic 修补 REINFORCE</h2>
         <div class="grid-2">
           <div class="card">
             <h3 class="accent-a">类比：空手道学生与教练</h3>
@@ -670,7 +682,7 @@
               <span class="mini-pill">Critic = 估计状态价值</span>
               <span class="mini-pill">Reward Model = 终局打分</span>
             </div>
-            <div class="callout callout-a tiny">如果退回最原始的 REINFORCE，模型必须等整段回答写完后才知道总分，方差极大，几乎无法定位“哪一步出错”。</div>
+            <div class="callout callout-a tiny">现在不再是“写完整篇后再猜哪一步错了”，而是在生成过程中持续有教练提供基线判断。</div>
           </div>
           <div class="card">
             <h3 class="accent-a">优势函数给出细粒度反馈</h3>
@@ -680,10 +692,16 @@
           </div>
         </div>
         <div class="process-strip">
-          <div class="process-box"><div class="k">Step 1</div><div class="v">Actor 采样整段回复，主动试错。</div></div>
-          <div class="process-box"><div class="k">Step 2</div><div class="v">Reward Model 对完整回答给终局奖励。</div></div>
-          <div class="process-box"><div class="k">Step 3</div><div class="v">Critic 估计基线并计算 Advantage。</div></div>
-          <div class="process-box"><div class="k">Step 4</div><div class="v">PPO 裁剪更新，避免策略一步跳太远。</div></div>
+          <div class="process-box"><div class="k">Step 1</div><div class="v">Actor 做 Rollout：基于 Prompt 逐字采样整段回复，只收集轨迹，不立刻更新参数。</div></div>
+          <div class="process-box"><div class="k">Step 2</div><div class="v">Reward Model 在终局打总分，并结合 Reference Model 的 KL 惩罚抑制奖励作弊。</div></div>
+          <div class="process-box"><div class="k">Step 3</div><div class="v">Critic 在生成时一路预测价值，等终局后再与真实回报对比，计算每个 Token 的 Advantage。</div></div>
+          <div class="process-box"><div class="k">Step 4</div><div class="v">PPO 按 Advantage 做裁剪更新：好动作升概率，坏动作降概率，但不允许策略一步跳太远。</div></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="figure-frame">
+          <img src="../assets/ppo.png" alt="PPO 时序图">
         </div>
       </section>
 
@@ -692,12 +710,7 @@
         <div class="grid-2">
           <div class="card">
             <h3 class="accent-d">为什么需要牵引绳</h3>
-            <p class="tiny">讲稿把模型比作赛道上的赛车。奖励就是终点奖金，但如果只追逐奖金，模型很容易奖励作弊：疯狂堆砌“谢谢您”“很荣幸”等礼貌空话，甚至输出看似高分却语法崩坏的垃圾文本。</p>
-            <div class="mini-pills">
-              <span class="mini-pill">Reward Hacking</span>
-              <span class="mini-pill">语言漂移</span>
-              <span class="mini-pill">知识遗忘风险</span>
-            </div>
+            <p class="tiny">模型很容易奖励作弊。我们奖励模型要输出礼貌的话语，此时模型疯狂堆砌“谢谢您”“很荣幸”等礼貌空话，甚至输出看似高分却语法崩坏的垃圾文本。</p>
           </div>
           <div class="card">
             <h3 class="accent-a">KL 约束的是“别离参考模型太远”</h3>
@@ -754,26 +767,36 @@
       </section>
 
       <section>
-        <h2><span class="accent-c">模块 C</span> DPO：数学等价性如何“消灭”奖励模型</h2>
+        <h2><span class="accent-c">模块 C</span> DPO：把复杂 RL 直接降成偏好分类</h2>
         <div class="grid-2">
           <div class="card">
-            <h3 class="accent-b">第一步：BT 模型只关心赢家和输家的分差</h3>
-            <p class="tiny">在讲稿的篮球联赛类比里，我们不需要知道 A 队和 F 队每场具体得多少分，只需要一个隐藏实力值，胜率就由两者差值决定。</p>
-            <div class="formula">$$P(y_c \succ y_r \mid x)=\sigma\left(r(x,y_c)-r(x,y_r)\right)$$</div>
-            <p class="tiny">DPO 沿用了这点：chosen 比 rejected 好多少，才是人类偏好监督的核心。</p>
+            <h3 class="accent-b">核心哲学：能一步到位，就不要三部门联动</h3>
+            <p class="tiny">PPO 需要 Actor 先实时生成，再让 Reward Model 打总分、Critic 做归因，最后才更新策略。DPO 的想法更激进：既然最终只关心“哪个回答更好”，那就直接对好坏回答做学习，跳过 Reward Model 与 Critic。</p>
+            <div class="callout callout-b tiny">它像一次“部门大裁员”：把复杂的在线强化学习，压缩成一个更像监督学习的偏好分类任务。</div>
           </div>
           <div class="card">
-            <h3 class="accent-b">第二步：最优策略把奖励写成概率比</h3>
-            <div class="formula">$$r^*(x,y)=\beta\log\frac{\pi_\theta(y|x)}{\pi_{ref}(y|x)}+\beta\log Z(x)$$</div>
-            <p class="tiny">其中 $Z(x)$ 是那个看似可怕的配分函数。关键魔法是：把它代回 BT 的“好回答减坏回答”之后，$Z(x)$ 在减法中会完全约掉。</p>
-            <div class="callout callout-b tiny">结论：策略模型本身的对数概率比，已经隐式携带了奖励信息，因此无需再单独训练庞大的 Reward Model。</div>
+            <h3 class="accent-b">训练时看到的是静态偏好三元组</h3>
+            <p class="tiny">DPO 不要求模型在训练时现场 rollout。它直接吃离线数据 $(x, y_w, y_l)$：给定同一个 Prompt，一个是赢家回答，一个是输家回答，数据通常由人类或强模型预先标出来。</p>
+            <div class="mini-pills">
+              <span class="mini-pill">Offline Data</span>
+              <span class="mini-pill">Winner / Loser</span>
+              <span class="mini-pill">无在线采样</span>
+            </div>
+            <div class="callout callout-b tiny">所以 DPO 的第一层优势非常工程化：训练时不需要“边生成边评估”，速度和显存压力都会显著下降。</div>
           </div>
         </div>
-        <div class="process-strip">
-          <div class="process-box"><div class="k">PPO 目标</div><div class="v">从带 KL 的奖励最大化出发。</div></div>
-          <div class="process-box"><div class="k">最优策略</div><div class="v">把最优奖励改写成策略/参考策略的对数比。</div></div>
-          <div class="process-box"><div class="k">代回 BT</div><div class="v">比较 chosen 与 rejected 的奖励差值。</div></div>
-          <div class="process-box"><div class="k">Cancel Out</div><div class="v">$Z(x)$ 被消掉，只剩可训练的分类目标。</div></div>
+        <div class="process-strip" style="grid-template-columns: repeat(5, 1fr);">
+          <div class="process-box"><div class="k">Step 1</div><div class="v">准备静态偏好数据集：Prompt + Winner + Loser。</div></div>
+          <div class="process-box"><div class="k">Step 2</div><div class="v">冻结的 Reference 先给这两种回答打“原始倾向分”，充当语言底线锚点。</div></div>
+          <div class="process-box"><div class="k">Step 3</div><div class="v">当前 Policy 再对 Winner / Loser 分别算对数概率，不现场生成新文本。</div></div>
+          <div class="process-box"><div class="k">Step 4</div><div class="v">比较 Policy 相对 Reference 的“进步幅度”，得到隐式奖励差。</div></div>
+          <div class="process-box"><div class="k">Step 5</div><div class="v">直接拉高 Winner、压低 Loser，把 RL 目标降成一个交叉熵式分类更新。</div></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="figure-frame">
+          <img src="../assets/dpo.png" alt="DPO 时序图">
         </div>
       </section>
 
@@ -781,28 +804,29 @@
         <h2><span class="accent-c">模块 C</span> DPO：双模型瘦身的红利，与静态数据集的代价</h2>
         <div class="grid-2">
           <div class="card">
-            <h3 class="accent-b">工程红利：四模型直接砍半</h3>
+            <h3 class="accent-b">工程红利：四模型直接砍成双模型</h3>
             <div class="process-strip" style="grid-template-columns: 1fr 1fr;">
-              <div class="process-box"><div class="k">PPO</div><div class="v">Actor + Critic + Reward + Reference</div></div>
-              <div class="process-box"><div class="k">DPO</div><div class="v">Policy + Reference</div></div>
+              <div class="process-box"><div class="k">PPO</div><div class="v">Actor + Critic + Reward + Reference，还要在线 Rollout。</div></div>
+              <div class="process-box"><div class="k">DPO</div><div class="v">Policy + Reference，只在静态偏好对上前向 / 反向传播。</div></div>
             </div>
             <div class="formula">$\mathcal{L}_{DPO}=-\log\sigma\left(\beta\log\frac{\pi_\theta(y_c|x)}{\pi_{ref}(y_c|x)}-\beta\log\frac{\pi_\theta(y_r|x)}{\pi_{ref}(y_r|x)}\right)$</div>
-            <p class="tiny">无需 Rollout、无需 Critic 价值估计、无需独立奖励模型，训练被降维为偏好对上的交叉熵优化。</p>
+            <p class="tiny">这条损失的直观解释其实很简单：相对参考模型，尽量把 chosen 的概率拉高，把 rejected 的概率压低。它本质上是一种“拉好答案、踩差答案”的对比学习。</p>
+            <div class="callout callout-b tiny">换句话说，策略模型本身已经隐式携带了奖励信息，因此不再需要单独训练一个庞大的 Reward Model。</div>
           </div>
           <div class="card">
-            <h3 class="accent-d">代价：离线学习容易过拟合</h3>
+            <h3 class="accent-d">代价：离线分类很省，但探索能力会缩水</h3>
             <ul class="tiny">
               <li><strong>OOD 分布偏移：</strong>遇到训练集没覆盖的罕见问题，模型可能行为崩溃。</li>
               <li><strong>奖励裕度爆炸：</strong>chosen 与 rejected 被越拉越开，模型越来越过度自信。</li>
               <li><strong>多样性塌缩：</strong>回答风格变单一、模板化，复杂推理上限受限。</li>
             </ul>
-            <div class="callout callout-d tiny">报告的判断很明确：DPO 在主观文本风格对齐上很强，但对需要探索的新颖推理路径，静态分类属性会成为瓶颈。</div>
+            <div class="callout callout-d tiny">DPO 在主观风格对齐、开源微调和资源受限场景里非常强，但一旦任务需要实时探索新推理路径，静态数据集就会成为瓶颈。</div>
           </div>
         </div>
       </section>
 
       <section>
-        <h2><span class="accent-c">模块 C</span> GRPO：为什么一定要移除 Critic</h2>
+        <h2><span class="accent-c">模块 C</span> GRPO：移除 Critic</h2>
         <div class="grid-2">
           <div class="card">
             <h3 class="accent-c">PPO 的 Critic 在长 CoT 面前很吃力</h3>
@@ -925,48 +949,6 @@
           <div class="callout callout-a">PPO 的高成本来自 Actor、Critic、Reward、Reference 同时在场，还要维持优化器状态和大规模激活值。</div>
           <div class="callout callout-c">GRPO 的革命性在于：去 Critic + 规则验证替代重奖励模型，再配合 LoRA 与激活检查点，显存可压缩约 90%。</div>
         </div>
-      </section>
-
-      <section>
-        <h2><span class="accent-c">模块 C</span> PPO / DPO / GRPO 多维深度对比</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>维度</th>
-              <th class="accent-a">PPO</th>
-              <th class="accent-b">DPO</th>
-              <th class="accent-c">GRPO</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>驻留模型</td><td>Actor + Critic + Reward + Reference</td><td>Actor + Reference</td><td>Actor + Reference + 组内轨迹缓冲</td></tr>
-            <tr><td>显存量级</td><td>约策略模型 3.5 - 4.0 倍</td><td>约策略模型 2.0 倍</td><td>约策略模型 2.0 倍</td></tr>
-            <tr><td>优势来源</td><td>Critic 的绝对价值估计</td><td>无需显式 Advantage</td><td>组内 Mean / Std 的相对评估</td></tr>
-            <tr><td>探索机制</td><td>在线主动探索</td><td>离线被动学习</td><td>组内并行主动探索</td></tr>
-            <tr><td>计算热点</td><td>Critic 反向 + Rollout 调度</td><td>静态偏好对交叉熵</td><td>单个 Prompt 多样本推理与验证</td></tr>
-            <tr><td>优势场景</td><td>通用对话对齐、安全护栏、复杂指令</td><td>短文本偏好、风格微调、情感调制</td><td>数学、代码、多步长 CoT 推理</td></tr>
-          </tbody>
-        </table>
-        <div class="callout callout-c">一句话记忆：PPO 最稳，DPO 最省，GRPO 最适合可验证的复杂推理探索。</div>
-      </section>
-
-      <section>
-        <h2><span class="accent-c">模块 C</span> 适用场景的二分天下</h2>
-        <div class="grid-3">
-          <div class="card">
-            <h3 class="accent-a">PPO：通用稳态底座</h3>
-            <p class="tiny">当目标是安全护栏、复杂指令遵循、通用聊天对齐时，PPO 依然是“最稳”的工程范式，只是代价极高。</p>
-          </div>
-          <div class="card">
-            <h3 class="accent-b">DPO：主观偏好任务的统治区</h3>
-            <p class="tiny">语气、风格、同理心、安全拒答这些难以写规则评分的任务，最适合预先标注“好回答 vs 坏回答”，再做离线 DPO。</p>
-          </div>
-          <div class="card">
-            <h3 class="accent-c">GRPO：客观推理任务的统治区</h3>
-            <p class="tiny">数学证明、算法代码、系统编程、多步逻辑链等任务更依赖主动试错与相对评分。哪怕 16 条轨迹里只有 1 条真正突破，也会被 Z-Score 放大并学进去。</p>
-          </div>
-        </div>
-        <div class="callout callout-c">报告给出的结论非常鲜明：DPO 擅长主观对齐，GRPO 擅长客观推理探索，二者不是替代关系，而是任务分工。</div>
       </section>
 
       <section>
