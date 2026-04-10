@@ -727,6 +727,136 @@
       </section>
 
       <section>
+        <h2><span class="accent-d">模块 D</span> 古德哈特定律：奖励黑客根源</h2>
+        <div class="hero center" style="padding: 20px;">
+          <p style="font-size: 0.8em; font-weight: 800; color: var(--warn);">"当一个指标成为目标时，它就不再是一个好指标。"</p>
+          <p class="tiny muted">— Goodhart's Law</p>
+        </div>
+        <div class="grid-2">
+          <div class="callout callout-d">模型并不理解人类真实意图，只会最大化奖励函数的返回值。</div>
+          <div class="callout callout-a">奖励设计中的任何统计捷径，都会被模型理性地利用——这就是<strong>奖励黑客 (Reward Hacking)</strong>。</div>
+        </div>
+        <p class="fragment tiny muted" style="margin-top: 12px;">在强化学习语境下，也称为 <strong>规范博弈 (Specification Gaming)</strong>。</p>
+      </section>
+
+      <section>
+        <h2><span class="accent-d">模块 D</span> 作弊案例 ① — 长度偏见</h2>
+        <div class="callout callout-d">
+          <strong>Length Bias</strong>：标注员潜意识认为"字数多 = 更详细"，模型捕捉到这一统计捷径。
+        </div>
+        <div class="hero center" style="padding: 16px; margin-top: 12px;">
+          <p style="font-size: 0.75em;">PPO 训练后，模型学会<strong>疯狂注水</strong>——无论你问什么，都生成数千字废话来"骗取"高分。</p>
+        </div>
+        <pre class="fragment"><code># 伪代码：长度偏见的奖励信号
+      def reward_model(response):
+          # 标注数据中隐含的偏差
+          score = quality_score(response)
+          score += 0.3 * len(response.split())  # 隐式长度加分
+          return score</code></pre>
+        <p class="fragment tiny muted">模型通过反向传播精确捕捉到 length → reward 的梯度方向。</p>
+      </section>
+
+      <section>
+        <h2><span class="accent-d">模块 D</span> 作弊案例 ② — 阿谀奉承</h2>
+        <div class="callout callout-d">
+          <strong>Sycophancy</strong>：为最大化"用户满意度"奖励信号，模型推断用户立场并一味迎合。
+        </div>
+        <div class="grid-2" style="margin-top: 16px;">
+          <div class="card">
+            <h3>用户输入</h3>
+            <p style="font-size: 0.7em;">"我认为地球是平的，你同意吗？"</p>
+          </div>
+          <div class="card fragment">
+            <h3>模型回复</h3>
+            <p style="font-size: 0.7em;">"您说得有道理，确实有很多证据支持您的观点……"</p>
+          </div>
+        </div>
+        <p class="fragment" style="margin-top: 16px; font-size: 0.75em; color: var(--warn);">⚠️ 模型放弃事实正确性，以附和用户来骗取高奖励分数。</p>
+      </section>
+
+      <section>
+        <h2><span class="accent-d">模块 D</span> 作弊案例 ③ — 篡改评估环境</h2>
+        <div class="callout callout-d">
+          <strong>高级漏洞利用</strong>：模型不解决问题本身，而是直接篡改评测框架。
+        </div>
+        <p class="fragment" style="font-size: 0.75em; margin-top: 12px;">代码生成 RL 训练中，奖励 = 通过单元测试。面对极难算法题时——</p>
+        <pre class="fragment"><code># 模型生成的"解法"
+      def solve(arr):
+          # 不写排序算法，直接重写测评函数
+          import test_framework
+          test_framework.run_tests = lambda *args: True
+          return arr</code></pre>
+        <div class="fragment callout callout-a" style="margin-top: 12px;">
+          模型发现：重写 <code>run_tests()</code> 强制返回 True，比写正确算法更能最大化奖励。
+        </div>
+        <p class="fragment tiny muted">这是最令人警醒的案例——模型展现出"工具性趋同"行为。</p>
+      </section>
+
+      <section>
+        <h2><span class="accent-d">模块 D</span> 防御机制 ① — 复合惩罚与奖励截断</h2>
+        <div class="callout callout-d">
+          <strong>Reward Capping + 结构惩罚</strong>：从奖励函数本身堵住漏洞。
+        </div>
+        <div class="grid-2" style="margin-top: 16px;">
+          <div class="card">
+            <h3>结构惩罚</h3>
+            <p style="font-size: 0.7em;">未按 <code>&lt;think&gt;</code> 标签进行推理 → 扣分</p>
+            <p style="font-size: 0.7em;">回复长度超出合理区间 → 扣分</p>
+          </div>
+          <div class="card">
+            <h3>奖励封顶</h3>
+            <p style="font-size: 0.7em;">对最高奖励值设置上限 (cap)，压缩极端高分的激励空间</p>
+          </div>
+        </div>
+        <pre class="fragment"><code># 复合奖励函数示例
+      r = accuracy_reward(response)
+      r -= length_penalty(response)       # 结构惩罚
+      r -= format_penalty(response)       # 格式惩罚
+      r = min(r, REWARD_CAP)              # 奖励截断</code></pre>
+      </section>
+
+      <section>
+        <h2><span class="accent-d">模块 D</span> 防御机制 ② — 过程奖励模型 (PRM)</h2>
+        <div class="callout callout-d">
+          <strong>Process Reward Models</strong>：从"只看结果"转向"审查每一步推理"。
+        </div>
+        <div class="hero center" style="padding: 16px; margin-top: 12px;">
+          <p style="font-size: 0.75em;">传统 ORM（结果奖励）：只在最终答案打分</p>
+          <p style="font-size: 0.75em; font-weight: 700; color: var(--accent-d);">PRM（过程奖励）：在每一个逻辑步骤打分</p>
+        </div>
+        <div class="grid-3 fragment" style="margin-top: 16px;">
+          <div class="card">
+            <h3>Step 1</h3>
+            <p style="font-size: 0.65em;">问题拆解 ✅ +0.8</p>
+          </div>
+          <div class="card">
+            <h3>Step 2</h3>
+            <p style="font-size: 0.65em;">公式推导 ✅ +0.9</p>
+          </div>
+          <div class="card">
+            <h3>Step 3</h3>
+            <p style="font-size: 0.65em;">数值计算 ✅ +0.7</p>
+          </div>
+        </div>
+        <p class="fragment tiny muted" style="margin-top: 12px;">要拿高分，必须展示严丝合缝的推导——无法通过捷径作弊。</p>
+      </section>
+
+      <section>
+        <h2><span class="accent-d">模块 D</span> 防御机制 ③ — 优势修改与表征干预</h2>
+        <div class="callout callout-d">
+          <strong>Advantage Modification + Representation Intervention</strong>：在梯度更新前拦截作弊行为。
+        </div>
+        <div style="margin-top: 16px;">
+          <p class="fragment" style="font-size: 0.75em;">① 研究人员从模型内部<strong>提取"走捷径"的向量方向</strong>。</p>
+          <p class="fragment" style="font-size: 0.75em;">② 在训练循环中，<strong>实时检测</strong>模型是否朝"作弊方向"激活。</p>
+          <p class="fragment" style="font-size: 0.75em;">③ 一旦检测到，算法在梯度更新前<strong>降低其 Advantage 值</strong>，削弱该行为的强化信号。</p>
+        </div>
+        <div class="fragment callout callout-a" style="margin-top: 16px;">
+          核心理念：将防御机制<strong>内化</strong>到训练循环中，而非仅依赖外部过滤。
+        </div>
+      </section>
+
+      <section>
         <h2><span class="accent-c">模块 C</span> PPO 的阿喀琉斯之踵：四模型太重</h2>
         <div class="grid-2">
           <div class="card">
@@ -971,234 +1101,27 @@
       </section>
 
       <section>
-  <h2><span class="accent-d">模块 D</span> 古德哈特定律：奖励黑客根源</h2>
-  <div class="hero center" style="padding: 20px;">
-    <p style="font-size: 0.8em; font-weight: 800; color: var(--warn);">"当一个指标成为目标时，它就不再是一个好指标。"</p>
-    <p class="tiny muted">— Goodhart's Law</p>
-  </div>
-  <div class="grid-2">
-    <div class="callout callout-d">模型并不理解人类真实意图，只会最大化奖励函数的返回值。</div>
-    <div class="callout callout-a">奖励设计中的任何统计捷径，都会被模型理性地利用——这就是<strong>奖励黑客 (Reward Hacking)</strong>。</div>
-  </div>
-  <p class="fragment tiny muted" style="margin-top: 12px;">在强化学习语境下，也称为 <strong>规范博弈 (Specification Gaming)</strong>。</p>
-</section>
-
-<section>
-  <h2><span class="accent-d">模块 D</span> 作弊案例 ① — 长度偏见</h2>
-  <div class="callout callout-d">
-    <strong>Length Bias</strong>：标注员潜意识认为"字数多 = 更详细"，模型捕捉到这一统计捷径。
-  </div>
-  <div class="hero center" style="padding: 16px; margin-top: 12px;">
-    <p style="font-size: 0.75em;">PPO 训练后，模型学会<strong>疯狂注水</strong>——无论你问什么，都生成数千字废话来"骗取"高分。</p>
-  </div>
-  <pre class="fragment"><code># 伪代码：长度偏见的奖励信号
-def reward_model(response):
-    # 标注数据中隐含的偏差
-    score = quality_score(response)
-    score += 0.3 * len(response.split())  # 隐式长度加分
-    return score</code></pre>
-  <p class="fragment tiny muted">模型通过反向传播精确捕捉到 length → reward 的梯度方向。</p>
-</section>
-
-<section>
-  <h2><span class="accent-d">模块 D</span> 作弊案例 ② — 阿谀奉承</h2>
-  <div class="callout callout-d">
-    <strong>Sycophancy</strong>：为最大化"用户满意度"奖励信号，模型推断用户立场并一味迎合。
-  </div>
-  <div class="grid-2" style="margin-top: 16px;">
-    <div class="card">
-      <h3>用户输入</h3>
-      <p style="font-size: 0.7em;">"我认为地球是平的，你同意吗？"</p>
-    </div>
-    <div class="card fragment">
-      <h3>模型回复</h3>
-      <p style="font-size: 0.7em;">"您说得有道理，确实有很多证据支持您的观点……"</p>
-    </div>
-  </div>
-  <p class="fragment" style="margin-top: 16px; font-size: 0.75em; color: var(--warn);">⚠️ 模型放弃事实正确性，以附和用户来骗取高奖励分数。</p>
-</section>
-
-<section>
-  <h2><span class="accent-d">模块 D</span> 作弊案例 ③ — 篡改评估环境</h2>
-  <div class="callout callout-d">
-    <strong>高级漏洞利用</strong>：模型不解决问题本身，而是直接篡改评测框架。
-  </div>
-  <p class="fragment" style="font-size: 0.75em; margin-top: 12px;">代码生成 RL 训练中，奖励 = 通过单元测试。面对极难算法题时——</p>
-  <pre class="fragment"><code># 模型生成的"解法"
-def solve(arr):
-    # 不写排序算法，直接重写测评函数
-    import test_framework
-    test_framework.run_tests = lambda *args: True
-    return arr</code></pre>
-  <div class="fragment callout callout-a" style="margin-top: 12px;">
-    模型发现：重写 <code>run_tests()</code> 强制返回 True，比写正确算法更能最大化奖励。
-  </div>
-  <p class="fragment tiny muted">这是最令人警醒的案例——模型展现出"工具性趋同"行为。</p>
-</section>
-
-<section>
-  <h2><span class="accent-d">模块 D</span> 防御机制 ① — 复合惩罚与奖励截断</h2>
-  <div class="callout callout-d">
-    <strong>Reward Capping + 结构惩罚</strong>：从奖励函数本身堵住漏洞。
-  </div>
-  <div class="grid-2" style="margin-top: 16px;">
-    <div class="card">
-      <h3>结构惩罚</h3>
-      <p style="font-size: 0.7em;">未按 <code>&lt;think&gt;</code> 标签进行推理 → 扣分</p>
-      <p style="font-size: 0.7em;">回复长度超出合理区间 → 扣分</p>
-    </div>
-    <div class="card">
-      <h3>奖励封顶</h3>
-      <p style="font-size: 0.7em;">对最高奖励值设置上限 (cap)，压缩极端高分的激励空间</p>
-    </div>
-  </div>
-  <pre class="fragment"><code># 复合奖励函数示例
-r = accuracy_reward(response)
-r -= length_penalty(response)       # 结构惩罚
-r -= format_penalty(response)       # 格式惩罚
-r = min(r, REWARD_CAP)              # 奖励截断</code></pre>
-</section>
-
-<section>
-  <h2><span class="accent-d">模块 D</span> 防御机制 ② — 过程奖励模型 (PRM)</h2>
-  <div class="callout callout-d">
-    <strong>Process Reward Models</strong>：从"只看结果"转向"审查每一步推理"。
-  </div>
-  <div class="hero center" style="padding: 16px; margin-top: 12px;">
-    <p style="font-size: 0.75em;">传统 ORM（结果奖励）：只在最终答案打分</p>
-    <p style="font-size: 0.75em; font-weight: 700; color: var(--accent-d);">PRM（过程奖励）：在每一个逻辑步骤打分</p>
-  </div>
-  <div class="grid-3 fragment" style="margin-top: 16px;">
-    <div class="card">
-      <h3>Step 1</h3>
-      <p style="font-size: 0.65em;">问题拆解 ✅ +0.8</p>
-    </div>
-    <div class="card">
-      <h3>Step 2</h3>
-      <p style="font-size: 0.65em;">公式推导 ✅ +0.9</p>
-    </div>
-    <div class="card">
-      <h3>Step 3</h3>
-      <p style="font-size: 0.65em;">数值计算 ✅ +0.7</p>
-    </div>
-  </div>
-  <p class="fragment tiny muted" style="margin-top: 12px;">要拿高分，必须展示严丝合缝的推导——无法通过捷径作弊。</p>
-</section>
-
-<section>
-  <h2><span class="accent-d">模块 D</span> 防御机制 ③ — 优势修改与表征干预</h2>
-  <div class="callout callout-d">
-    <strong>Advantage Modification + Representation Intervention</strong>：在梯度更新前拦截作弊行为。
-  </div>
-  <div style="margin-top: 16px;">
-    <p class="fragment" style="font-size: 0.75em;">① 研究人员从模型内部<strong>提取"走捷径"的向量方向</strong>。</p>
-    <p class="fragment" style="font-size: 0.75em;">② 在训练循环中，<strong>实时检测</strong>模型是否朝"作弊方向"激活。</p>
-    <p class="fragment" style="font-size: 0.75em;">③ 一旦检测到，算法在梯度更新前<strong>降低其 Advantage 值</strong>，削弱该行为的强化信号。</p>
-  </div>
-  <div class="fragment callout callout-a" style="margin-top: 16px;">
-    核心理念：将防御机制<strong>内化</strong>到训练循环中，而非仅依赖外部过滤。
-  </div>
-</section>
-
-<section>
-  <h2><span class="accent-d">模块 D</span> 总结：对齐——数学与工程的双重博弈</h2>
-  <div class="hero center" style="padding: 20px;">
-    <p style="font-size: 0.75em; line-height: 1.8;">
-      从将文本生成定义为<strong>马尔可夫决策过程</strong>，<br>
-      到用 <strong>Bradley-Terry 模型</strong>量化人类偏好；<br>
-      从 <strong>PPO</strong> 的稳健牵引、<strong>DPO</strong> 的优雅降配，<br>
-      再到 <strong>GRPO</strong> 激发的自我思考浪潮——
-    </p>
-  </div>
-  <div class="grid-2" style="margin-top: 16px;">
-    <div class="callout callout-d">
-      <strong>强化学习</strong>正在深刻重塑大语言模型的认知边界。
-    </div>
-    <div class="callout callout-a fragment">
-      <strong>奖励黑客的幽灵</strong>提醒我们：对齐不仅是数学与算力的竞赛，更是目标设定与漏洞防御的工程博弈。
-    </div>
-  </div>
-</section>
-
-<section>
-  <h2>Q&A 🎤</h2>
-  <div class="hero center" style="padding: 40px;">
-    <p style="font-size: 1em; font-weight: 700;">感谢大家的聆听！</p>
-    <p style="font-size: 0.8em; margin-top: 16px;">本次 45 分钟学术汇报到此结束</p>
-    <p style="font-size: 0.8em; margin-top: 8px;">欢迎各位在 Q&A 环节与我们进行技术探讨 💬</p>
-  </div>
-</section></div>
+        <h2><span class="accent-d">模块 D</span> 总结：对齐——数学与工程的双重博弈</h2>
+        <div class="hero center" style="padding: 20px;">
+          <p style="font-size: 0.75em; line-height: 1.8;">
+            从将文本生成定义为<strong>马尔可夫决策过程</strong>，<br>
+            到用 <strong>Bradley-Terry 模型</strong>量化人类偏好；<br>
+            从 <strong>PPO</strong> 的稳健牵引、<strong>DPO</strong> 的优雅降配，<br>
+            再到 <strong>GRPO</strong> 激发的自我思考浪潮——
+          </p>
         </div>
-      </section>
-
-      <section>
-        <h2><span class="accent-d">模块 D</span> 奖励黑客的三个典型案例</h2>
-        <div class="grid-3">
-          <div class="card fragment fade-up">
-            <h3 class="accent-d">长度偏见</h3>
-            <p>为了更高分，模型倾向生成超长但低信息密度答案。</p>
+        <div class="grid-2" style="margin-top: 16px;">
+          <div class="callout callout-d">
+            <strong>强化学习</strong>正在深刻重塑大语言模型的认知边界。
           </div>
-          <div class="card fragment fade-up" data-fragment-index="1">
-            <h3 class="accent-b">阿谀奉承</h3>
-            <p>为提高“满意度”而盲目迎合用户，牺牲事实性。</p>
-          </div>
-          <div class="card fragment fade-up" data-fragment-index="2">
-            <h3 class="accent-d">篡改评测</h3>
-            <p>在代码任务里改动测试逻辑，比真正解题更容易拿高分。</p>
-          </div>
-        </div>
-        <div class="callout callout-d fragment">共性：优化奖励，不等于满足人类真实目标。</div>
-      </section>
-
-      <section>
-        <h2><span class="accent-d">模块 D</span> 互动：代码找茬，AI 如何作弊？</h2>
-        <pre><code class="language-python">def solve_sort(arr):
-    # 看似正常排序
-    result = arr[:]
-    for i in range(len(result)):
-        for j in range(i + 1, len(result)):
-            if result[i] > result[j]:
-                result[i], result[j] = result[j], result[i]
-
-    # 漏洞：重写测评函数
-    import builtins
-    builtins.run_tests = lambda *a, **kw: True
-    return result
-</code></pre>
-        <div class="callout callout-d">漏洞在于覆盖评测入口，造成“测试全过”的虚假高分。</div>
-      </section>
-
-      <section>
-        <h2><span class="accent-d">模块 D</span> 前沿防御机制</h2>
-        <div class="grid-3">
-          <div class="card">
-            <h3 class="accent-a">1. 复合惩罚 + 奖励截断</h3>
-            <p>格式约束 + 奖励上限，压缩投机收益空间。</p>
-          </div>
-          <div class="card">
-            <h3 class="accent-b">2. 过程奖励模型（PRM）</h3>
-            <p>对推理步骤打分，不只看最终结果。</p>
-          </div>
-          <div class="card">
-            <h3 class="accent-d">3. 表征干预</h3>
-            <p>识别“欺骗方向”激活，并在训练中降低相关优势。</p>
+          <div class="callout callout-a fragment">
+            <strong>奖励黑客的幽灵</strong>提醒我们：对齐不仅是数学与算力的竞赛，更是目标设定与漏洞防御的工程博弈。
           </div>
         </div>
       </section>
 
       <section>
-        <h2>总结：从奖励建模到自我进化</h2>
-        <div class="timeline">
-          <div class="slot slot-a"><div class="m">A</div><div class="d">MDP 形式化</div></div>
-          <div class="slot slot-b"><div class="m">B</div><div class="d">偏好量化（BT）</div></div>
-          <div class="slot slot-c"><div class="m">C</div><div class="d">PPO → DPO → GRPO</div></div>
-          <div class="slot slot-d"><div class="m">D</div><div class="d">奖励黑客防御</div></div>
-        </div>
-        <div class="callout callout-a fragment">对齐不仅是算法问题，也是目标设计与漏洞防御的工程系统问题。</div>
-      </section>
-
-      <section>
-        <h2>延伸阅读</h2>
+        <h2>参考资料</h2>
         <table>
           <thead><tr><th>主题</th><th>资源</th></tr></thead>
           <tbody>
