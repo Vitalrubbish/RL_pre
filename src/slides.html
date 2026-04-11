@@ -407,6 +407,36 @@
       background: #fff;
     }
 
+    .balanced-vert {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      align-items: stretch;
+      row-gap: 16px;
+      min-height: 620px;
+    }
+
+    .balanced-vert.tight-gap {
+      row-gap: 12px;
+    }
+
+    .balanced-vert > h2,
+    .balanced-vert > h3,
+    .balanced-vert > p {
+      margin-bottom: 0;
+    }
+
+    .body-center {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 14px;
+      min-height: 100%;
+    }
+
+    .body-center.tight-gap {
+      gap: 10px;
+    }
+
     pre {
       font-family: "JetBrains Mono", monospace;
       font-size: 0.34em;
@@ -489,6 +519,16 @@
       .bar-row .tiny { display: none; }
       .stack-item, .sample-row { grid-template-columns: 1fr; }
       .stack-meta, .sample-score { text-align: left; }
+      .balanced-vert {
+        min-height: auto;
+        grid-template-rows: auto;
+        row-gap: 10px;
+      }
+      .body-center {
+        justify-content: flex-start;
+        gap: 10px;
+        min-height: auto;
+      }
     }
   </style>
 </head>
@@ -581,65 +621,245 @@
         </div>
       </section>
 
-      <section>
-        <h2><span class="accent-b">模块 B</span> 为什么需要成对比较？</h2>
-        <div class="grid-2">
-          <div class="card">
-            <h3 class="accent-d">绝对打分：高方差</h3>
-            <p>同一答案可能被打 68 或 92，标注口径差异太大。</p>
-          </div>
-          <div class="card">
-            <h3 class="accent-b">成对比较：低方差</h3>
-            <p>“A 和 B 哪个更好？”标注一致性更高，样本可写为 $(x,y_c,y_r)$。</p>
-          </div>
-        </div>
-        <div class="formula">$\mathcal{D}=\{(x^{(i)},y_c^{(i)},y_r^{(i)})\}_{i=1}^N,\; y_c\succ y_r$</div>
-        <div class="callout callout-b fragment">RLHF 借鉴了搜索排序中的隐式比较信号。</div>
+      <section class="center">
+          <h2>第二部分</h2>
+          <h2> Bradley-Terry 奖励模型 </h2>
       </section>
 
-      <section>
-        <h2><span class="accent-b">模块 B</span> Bradley-Terry 模型</h2>
-        <div class="grid-2">
-          <div>
+      <section class="balanced-vert">
+        <h2><span class="accent-b">模块 B</span> 思维启发：搜索引擎如何给网页排名？</h2>
+        <div class="body-center">
+          <div class="hero center" style="padding: 20px;">
+            <p style="font-size: 0.8em; font-weight: 700;">当你搜索一个关键词，搜索引擎展示了 10 个结果<br>它怎么知道哪个该排第一？</p>
+          </div>
+          <div class="grid-2">
+            <div class="card fragment fade-right">
+              <h3 class="accent-b">用户点击 = 隐式成对比较</h3>
+              <p>你点了第 3 个结果、跳过第 1 和第 2 个，这本质上就是一次投票：<br>“第 3 个比前两个更好”。</p>
+              <div class="callout callout-b tiny">Google 的早期排序算法大量利用了这种基于点击的隐式偏好信号。</div>
+            </div>
+            <div class="card fragment fade-left">
+              <h3 class="accent-c">RLHF 的偏好收集完全一致</h3>
+              <p>不让标注员打绝对分数，而是让他们在两个回答中<strong>选出更好的那个</strong>。</p>
+              <div class="callout callout-c tiny">从搜索排序到 LLM 对齐，“成对比较”其实是同一把核心钥匙。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="balanced-vert">
+        <h2><span class="accent-b">模块 B</span> 为什么需要成对比较？</h2>
+        <div class="body-center">
+          <div class="grid-2">
+            <div class="card">
+              <h3 class="accent-d">绝对打分：高方差</h3>
+              <p>同一篇作文，不同标注员的打分可能差距悬殊：</p>
+              <div class="sample-board">
+                <div class="sample-row">
+                  <div class="sample-id">严格者</div>
+                  <div class="sample-track"><div class="sample-fill" style="width: 68%; background: linear-gradient(90deg,#dc2626,#ef4444);">68 分</div></div>
+                  <div class="sample-score accent-d">偏低</div>
+                </div>
+                <div class="sample-row">
+                  <div class="sample-id">宽松者</div>
+                  <div class="sample-track"><div class="sample-fill" style="width: 92%; background: linear-gradient(90deg,#059669,#34d399);">92 分</div></div>
+                  <div class="sample-score accent-c">偏高</div>
+                </div>
+              </div>
+              <div class="callout callout-d tiny">差值 24 分，高方差会直接变成不稳定的梯度信号，模型很难稳定收敛。</div>
+            </div>
+            <div class="card">
+              <h3 class="accent-b">成对比较：低方差</h3>
+              <p>“A 和 B 哪个更好？”这个问题更符合人类直觉，判断速度更快、一致性也更高。</p>
+              <div class="callout callout-b tiny">它把困难的绝对量化问题，降维成简单的相对排序问题。</div>
+              <p class="tiny fragment" style="margin-top: 8px;">标注一致性（Inter-Annotator Agreement）往往会明显高于绝对打分。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="balanced-vert">
+        <h2><span class="accent-b">模块 B</span> RLHF 偏好数据的标注格式</h2>
+        <div class="body-center">
+          <div class="grid-2">
+            <div class="card">
+              <h3 class="accent-b">偏好三元组 $(x,\,y_c,\,y_r)$</h3>
+              <table>
+                <thead><tr><th>符号</th><th>含义</th><th>示例</th></tr></thead>
+                <tbody>
+                  <tr><td>$x$</td><td>用户提问（Prompt）</td><td>“如何写请假信？”</td></tr>
+                  <tr><td>$y_c$</td><td>Chosen（更好回答）</td><td>条理清晰、语气友好</td></tr>
+                  <tr><td>$y_r$</td><td>Rejected（较差回答）</td><td>语气傲慢、缺乏格式</td></tr>
+                </tbody>
+              </table>
+              <div class="formula">$\mathcal{D}=\{(x^{(i)},y_c^{(i)},y_r^{(i)})\}_{i=1}^N,\; y_c\succ y_r$</div>
+            </div>
+            <div class="card">
+              <h3 class="accent-a">标注工程实践</h3>
+              <div class="process-strip" style="grid-template-columns: 1fr;">
+                <div class="process-box"><div class="k">采样</div><div class="v">用 SFT 模型对同一 Prompt 生成多条候选回答。</div></div>
+                <div class="process-box"><div class="k">配对</div><div class="v">将候选回答两两组合，形成比较对。</div></div>
+                <div class="process-box"><div class="k">标注</div><div class="v">人类标注员从每对中选出更好的那个。</div></div>
+              </div>
+              <div class="callout callout-a tiny fragment">InstructGPT：40 名标注员，约 33k 偏好对，训练出第一代对齐奖励模型。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="balanced-vert">
+        <h2><span class="accent-b">模块 B</span> Bradley-Terry 模型：Elo 积分的跨界应用</h2>
+        <div class="body-center">
+          <div class="grid-2">
             <div class="card">
               <h3 class="accent-b">核心直觉</h3>
-              <p>每个回答有隐藏实力值 $r$，胜率由分差决定，类似 Elo。</p>
+              <p>每个回答都有一个隐藏“实力值” $r$，就像每个棋手都有一个 Elo 评分。</p>
+              <p class="tiny">两个回答“对局”时，实力值更高的那个，获胜概率也更大。</p>
+              <div class="mini-pills">
+                <span class="mini-pill">1952 年提出</span>
+                <span class="mini-pill">国际象棋 Elo 基础</span>
+                <span class="mini-pill">电竞排位赛核心</span>
+              </div>
             </div>
-            <div class="card" style="margin-top: 10px;">
-              <h3>训练目标</h3>
-              <p class="tiny">最大化 chosen 胜出概率。</p>
-              <div class="formula">$\mathcal{L}=-\mathbb{E}[\log\sigma(r_\theta(x,y_c)-r_\theta(x,y_r))]$</div>
+            <div class="card">
+              <h3 class="accent-b">Elo 对局类比</h3>
+              <div class="sample-board">
+                <div class="sample-row">
+                  <div class="sample-id">Chosen</div>
+                  <div class="sample-track"><div class="sample-fill" style="width: 82%; background: linear-gradient(90deg,#7c3aed,#a78bfa);">r = 1520</div></div>
+                  <div class="sample-score accent-b">高 Elo</div>
+                </div>
+                <div class="sample-row">
+                  <div class="sample-id">Rejected</div>
+                  <div class="sample-track"><div class="sample-fill" style="width: 38%; background: linear-gradient(90deg,#94a3b8,#cbd5e1);">r = 1280</div></div>
+                  <div class="sample-score muted">低 Elo</div>
+                </div>
+              </div>
+              <p class="tiny" style="margin-top: 8px;">分差 240 时，高分方胜率可达 95% 以上。<br>奖励模型就是在学一套与人类偏好一致的“Elo 评分系统”。</p>
             </div>
           </div>
-          <div class="card">
-            <div class="formula">$$P(y_c \succ y_r|x)=\sigma\left(r_\theta(x,y_c)-r_\theta(x,y_r)\right)$$</div>
-            <ul>
-              <li class="fragment">分差越大，chosen 胜率越接近 1。</li>
-              <li class="fragment">分差为 0，胜率约 50%。</li>
-              <li class="fragment">Sigmoid 将分差映射为概率。</li>
-            </ul>
+          <div class="callout callout-b fragment">关键洞察：我们不需要知道绝对分数，只需要知道分差，因为分差决定了胜率。</div>
+        </div>
+      </section>
+
+      <section class="balanced-vert">
+        <h2><span class="accent-b">模块 B</span> BT 胜率公式：Sigmoid 映射</h2>
+        <div class="body-center">
+          <div class="grid-2">
+            <div class="card">
+              <h3 class="accent-b">公式</h3>
+              <div class="formula">$$P(y_c \succ y_r|x)=\sigma\!\left(r_\theta(x,y_c)-r_\theta(x,y_r)\right)$$</div>
+              <p class="tiny" style="margin-top: 8px;">Sigmoid 函数 $\sigma(z)=\frac{1}{1+e^{-z}}$ 会把任意实数分差映射到 $[0,1]$ 概率区间。</p>
+              <div class="callout callout-b tiny">分差先由奖励模型给出，再由 Sigmoid 翻译成“Chosen 获胜”的概率。</div>
+            </div>
+            <div class="card">
+              <h3>分差与胜率的对应关系</h3>
+              <div class="sample-board">
+                <div class="sample-row">
+                  <div class="sample-id">分差 = 0</div>
+                  <div class="sample-track"><div class="sample-fill" style="width: 50%; background: linear-gradient(90deg,#94a3b8,#cbd5e1);">50%</div></div>
+                  <div class="sample-score muted">抛硬币</div>
+                </div>
+                <div class="sample-row">
+                  <div class="sample-id">分差 = 2</div>
+                  <div class="sample-track"><div class="sample-fill" style="width: 88%; background: linear-gradient(90deg,#60a5fa,#93c5fd);">88%</div></div>
+                  <div class="sample-score accent-a">明显优势</div>
+                </div>
+                <div class="sample-row">
+                  <div class="sample-id">分差 = 5</div>
+                  <div class="sample-track"><div class="sample-fill" style="width: 99%; background: linear-gradient(90deg,#7c3aed,#a78bfa);">99.3%</div></div>
+                  <div class="sample-score accent-b">碾压</div>
+                </div>
+                <div class="sample-row">
+                  <div class="sample-id">分差 = -2</div>
+                  <div class="sample-track"><div class="sample-fill" style="width: 12%; background: linear-gradient(90deg,#dc2626,#ef4444);">12%</div></div>
+                  <div class="sample-score accent-d">劣势</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section>
-        <h2><span class="accent-b">模块 B</span> BT 模型的局限性</h2>
-        <div class="grid-2">
+      <section class="balanced-vert tight-gap">
+        <h2><span class="accent-b">模块 B</span> 奖励模型的损失函数</h2>
+        <div class="body-center tight-gap">
           <div class="card">
-            <h3 class="accent-d">传递性假设</h3>
-            <p>若 A ≻ B 且 B ≻ C，则 A ≻ C。</p>
-            <div class="callout callout-d tiny">但真实偏好可能像“石头剪刀布”，出现循环非传递。</div>
+            <h3 class="accent-b">二元交叉熵：把“谁更好”当作分类任务</h3>
+            <div class="formula">$$\mathcal{L}_{RM}=-\mathbb{E}_{(x,y_c,y_r)\sim\mathcal{D}}\!\left[\log\sigma\!\left(r_\theta(x,y_c)-r_\theta(x,y_r)\right)\right]$$</div>
           </div>
-          <div class="card">
-            <h3 class="accent-b">前沿方向</h3>
-            <ul>
-              <li>多维奖励建模（逻辑性/文采/安全性）。</li>
-              <li>偏好嵌入与非传递结构建模。</li>
-              <li>Beyond BT 的概率偏好流形。</li>
-            </ul>
+          <div class="grid-2">
+            <div class="card fragment">
+              <h3 class="accent-c">训练目标</h3>
+              <p class="tiny">梯度下降不断更新 $\theta$：<br>拉高 Chosen 分数，压低 Rejected 分数，让分差越来越大，最终让 $\sigma$ 输出逼近 1。</p>
+            </div>
+            <div class="card fragment">
+              <h3 class="accent-a">直觉类比</h3>
+              <p class="tiny">就像 Elo 系统中，每场对局结束后根据胜负调整双方积分。这里每个偏好对就是一场“对局”，梯度下降就是“积分调整”的过程。</p>
+              <div class="callout callout-a tiny">区别在于：Elo 用固定更新公式，RM 是端到端优化一个神经网络评分器。</div>
+            </div>
           </div>
         </div>
-        <div class="callout callout-b fragment">工程上 BT 仍主流：简单、高效、可微分。</div>
+      </section>
+
+      <section class="balanced-vert tight-gap">
+        <h2><span class="accent-b">模块 B</span> 奖励模型训练流水线</h2>
+        <div class="body-center tight-gap">
+          <div class="process-strip">
+            <div class="process-box"><div class="k">Step 1 · 数据收集</div><div class="v">对同一 Prompt 用 SFT 模型采样多条回答，标注员两两比较选出胜负。</div></div>
+            <div class="process-box"><div class="k">Step 2 · 模型初始化</div><div class="v">从预训练 LLM 出发，移除 LM Head，加装标量回归头（Scalar Head）。</div></div>
+            <div class="process-box"><div class="k">Step 3 · 梯度优化</div><div class="v">在偏好对上用 BT 损失做梯度下降，不断拉大好坏回答的分差。</div></div>
+            <div class="process-box"><div class="k">Step 4 · 部署上线</div><div class="v">收敛后的 RM 为 PPO 等算法提供自动“裁判”打分。</div></div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <h3 class="accent-b">工业级参考</h3>
+              <div class="stack-list">
+                <div class="stack-item">
+                  <div class="stack-label">InstructGPT</div>
+                  <div class="stack-track"><div class="stack-fill" style="width: 100%; background: linear-gradient(90deg,#7c3aed,#a78bfa);"></div></div>
+                  <div class="stack-meta">175B (GPT-3)</div>
+                </div>
+                <div class="stack-item">
+                  <div class="stack-label">LLaMA-2</div>
+                  <div class="stack-track"><div class="stack-fill" style="width: 40%; background: linear-gradient(90deg,#0e7490,#06b6d4);"></div></div>
+                  <div class="stack-meta">70B</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <h3 class="accent-a">最终输出</h3>
+              <p class="tiny">给定任意 $(x, y)$，奖励模型输出一个标量分数 $r_\theta(x,y)\in\mathbb{R}$。</p>
+              <div class="callout callout-a tiny">这个分数会成为后续 PPO / DPO / GRPO 等算法的奖励信号来源。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="balanced-vert">
+        <h2><span class="accent-b">模块 B</span> BT 模型的局限性</h2>
+        <div class="body-center">
+          <div class="grid-2">
+            <div class="card">
+              <h3 class="accent-d">传递性假设可能失效</h3>
+              <p>BT 假设：若 A ≻ B 且 B ≻ C，则 A ≻ C。</p>
+              <div class="callout callout-d tiny">但真实偏好可能像“石头剪刀布”：<br>A 逻辑严谨胜 B，B 文采优美胜 C，C 简洁精炼又反过来胜 A。</div>
+              <p class="tiny" style="margin-top: 8px;">在多维人类评价里，循环非传递性很常见，单一标量不一定能忠实表达全部偏好结构。</p>
+            </div>
+            <div class="card">
+              <h3 class="accent-b">前沿突破方向</h3>
+              <ul>
+                <li><strong>多维奖励建模</strong>：逻辑性、安全性、文采分别建模。</li>
+                <li><strong>偏好嵌入</strong>：在高维向量空间中表达非传递结构。</li>
+                <li><strong>广义偏好分布</strong>：超越单一 BT 标量分数。</li>
+              </ul>
+              <div class="callout callout-b tiny">但工程上 BT 仍是主流，因为它简单、高效、可微，而且在大规模数据下已经足够好用。</div>
+            </div>
+          </div>
+          <div class="callout callout-a fragment">
+            我们现在已经有了一个能评判回答好坏的奖励模型。下一步，就是把这些分数真正反哺给大模型，推动它继续进化。
+          </div>
+        </div>
       </section>
 
       <section class="center">
