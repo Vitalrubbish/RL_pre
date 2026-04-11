@@ -535,89 +535,206 @@
 <body>
   <div class="reveal">
     <div class="slides">
-      <section>
+      <section class="center">
         <div class="hero">
           <h1>大语言模型对齐技术<br>从奖励建模到前沿强化学习算法</h1>
-          <p class="muted">PPO · DPO · GRPO · Reward Hacking</p>
-          <div>
-            <span class="chip chip-a">模块 A · 对齐基础与 MDP</span>
-            <span class="chip chip-b">模块 B · Bradley-Terry 奖励模型</span>
-            <span class="chip chip-c">模块 C · PPO / DPO / GRPO</span>
-            <span class="chip chip-d">模块 D · 奖励黑客与防御</span>
-          </div>
-          <p class="tiny muted" style="margin-top: 18px;">面向大二学生 · 45 分钟学术演讲</p>
+          <p class="tiny muted" style="margin-top: 18px;">楼灏·张成宇·张煊·卓翔</p>
         </div>
       </section>
 
       <section>
-        <h2>演讲全局规划</h2>
-        <div class="timeline">
-          <div class="slot slot-a"><div class="m">模块 A</div><div class="t">10'</div><div class="d">对齐基础<br>文本生成 → MDP</div></div>
-          <div class="slot slot-b"><div class="m">模块 B</div><div class="t">10'</div><div class="d">偏好量化<br>Bradley-Terry 模型</div></div>
-          <div class="slot slot-c"><div class="m">模块 C</div><div class="t">15'</div><div class="d">策略优化<br>PPO · DPO · GRPO</div></div>
-          <div class="slot slot-d"><div class="m">模块 D</div><div class="t">10'</div><div class="d">奖励黑客<br>防御机制</div></div>
-        </div>
-        <div class="grid-2">
-          <div class="callout callout-a fragment fade-up">
-            <strong>核心问题：</strong>预训练模型有海量知识，为何不能直接成为好助手？
+        <h2>互动投票: 哪个 AI 回答更好？</h2>
+        <p class="muted tiny">场景：你向一个千亿参数模型提问"请解释海森堡不确定性原理"</p>
+        <div class="versus">
+          <div class="quote-box fragment fade-right" style="border-left: 4px solid var(--d);">
+            <div class="qt">
+              <strong class="accent-d">回答 A</strong><br>
+              "连这都不懂吗？海森堡不确定性原理指出，粒子的位置和动量不可能同时被精确测量，必须满足 $\Delta x \Delta p \geq \frac{\hbar}{2}$。这么基础的物理常识，建议你先去读读本科教材，别浪费算力。"
+            </div>
+            <p class="tiny muted" style="margin-top:6px;">事实精准，但语气傲慢甚至有攻击性</p>
           </div>
-          <div class="callout callout-c fragment fade-up">
-            <strong>核心工具：</strong>强化学习将文本生成变成可优化的得分游戏。
+          <div class="vs-label">VS</div>
+          <div class="quote-box fragment fade-left" style="border-left: 4px solid var(--c);">
+            <div class="qt">
+              <strong class="accent-c">回答 B</strong><br>
+              "非常荣幸为您解答！简单来说，当我们观察粒子时，不可避免地会干扰到它的运动，也就是所谓的'观察者效应'，所以无法同时测准位置和速度。希望对您有所启发！"
+            </div>
+            <p class="tiny muted" style="margin-top:6px;">语气友好，但混淆了不确定性原理与观察者效应</p>
           </div>
         </div>
       </section>
 
       <section>
-        <h2><span class="accent-a">模块 A</span> 开场互动：什么是“对齐”？</h2>
-        <p class="muted tiny">请投票：哪个 AI 回答更好？</p>
+        <h2>投票揭晓</h2>
         <div class="grid-2">
-          <div class="card fragment fade-right">
-            <h3 class="accent-c">回答 A</h3>
-            <p>“这道题显而易见。结论是 $e^{i\pi}+1=0$，无需进一步解释。”</p>
-            <p class="tiny muted">事实正确，但语气傲慢。</p>
+          <div class="card">
+            <h3 class="accent-d">回答 A 的问题</h3>
+            <p>事实极其精准，但语气傲慢，甚至带有攻击性。<br>用户体验极差。</p>
           </div>
-          <div class="card fragment fade-left">
-            <h3 class="accent-a">回答 B</h3>
-            <p>“好问题！欧拉公式把五个常数联系在一起，我们从泰勒展开理解它……”</p>
-            <p class="tiny muted">事实正确，且友好、有条理。</p>
+          <div class="card">
+            <h3 class="accent-c">回答 B 的问题</h3>
+            <p>语气极度礼貌谦卑，但犯了经典科学常识错误&mdash;&mdash;把不确定性原理与"观察者效应"混为一谈。</p>
           </div>
         </div>
         <div class="callout callout-a fragment">
-          对齐不仅追求正确，还追求 Helpful、Harmless、Honest。
+          <strong>"礼貌悖论"：</strong>研究发现，使用粗鲁提示词时 AI 准确率反而更高&mdash;&mdash;因为过多客套话在概率系统里引入了噪音，稀释了核心指令。
+        </div>
+        <div class="callout callout-d fragment">
+          这正是<strong>对齐（Alignment）</strong>的主观性与困难所在：让千亿参数的概率机器变得"有用、诚实且无害"，充满了妥协与博弈。
         </div>
       </section>
 
       <section>
-        <h2><span class="accent-a">模块 A</span> 从“词语接龙”到“有用助手”</h2>
+        <h2>对齐的目标 HHH 原则</h2>
+        <div class="grid-3">
+          <div class="card fragment fade-up" style="text-align:center;">
+            <div style="font-size:2em; margin-bottom:4px;">H</div>
+            <h3 class="accent-a">Helpful</h3>
+            <p>有用&mdash;&mdash;能准确理解并高效回应用户需求</p>
+          </div>
+          <div class="card fragment fade-up" style="text-align:center;">
+            <div style="font-size:2em; margin-bottom:4px;">H</div>
+            <h3 class="accent-c">Honest</h3>
+            <p>诚实&mdash;&mdash;不编造事实、不夸大能力、承认不确定性</p>
+          </div>
+          <div class="card fragment fade-up" style="text-align:center;">
+            <div style="font-size:2em; margin-bottom:4px;">H</div>
+            <h3 class="accent-d">Harmless</h3>
+            <p>无害&mdash;&mdash;拒绝有害请求，不产生歧视、偏见或危险内容</p>
+          </div>
+        </div>
+        <div class="callout callout-a fragment" style="margin-top:14px;">
+          AI 本身不懂什么是"礼貌"或"正确"。对齐工程的使命，就是将这些<strong>人类价值观</strong>注入到概率模型中。
+        </div>
+      </section>
+
+      <section class="center">
+          <h2>第一部分</h2>
+          <h2> LLM为什么需要强化学习？</h2>
+      </section>
+
+
+      <section>
+        <h2>预训练：一个"通用文档补全器"</h2>
         <div class="grid-2">
           <div class="card">
             <h3 class="accent-a">预训练目标</h3>
-            <p>Next-Token Prediction 擅长续写分布，却不天然理解“怎样回答更好”。</p>
-            <div class="callout callout-a tiny">“如何写请假信？”可能被续写成“如何写辞职信？……”</div>
+            <p>核心目标只有一个：<strong>预测下一个词（Next-Token Prediction）</strong></p>
+            <p>数千万美元 + 数万张 GPU + 互联网几乎所有文本 &rarr; 忠实地模仿互联网文本的概率分布</p>
           </div>
           <div class="card">
-            <h3 class="accent-b">SFT 的瓶颈</h3>
-            <ul>
-              <li class="fragment">高质量标注数据成本高。</li>
-              <li class="fragment">只看好答案，不知道坏答案为何坏。</li>
-              <li class="fragment">需要探索与纠错，而不是纯模仿。</li>
-            </ul>
+            <h3 class="accent-d">致命问题</h3>
+            <p>它是"文档补全器"，不是"助手"。</p>
+            <div class="callout callout-d tiny" style="margin-top:6px;">
+              问："如何写一封请假信？"<br>
+              Base 模型回答："如何写一封辞职信？"<br>
+              &mdash;&mdash;它在模仿论坛里的"同问"帖，而非给出标准答案
+            </div>
           </div>
         </div>
-        <div class="callout callout-c fragment">引入强化学习：奖励正确行为，惩罚错误行为。</div>
+        <div class="callout callout-a fragment">
+          预训练 &ne; 对话能力。模型只学会了"接龙"，没有学会"回答"。
+        </div>
       </section>
 
       <section>
-        <h2><span class="accent-a">模块 A</span> 文本生成的马尔可夫决策过程（MDP）</h2>
-        <div class="steps">
-          <div class="step"><div class="tag" style="background: rgba(14,116,144,0.2); color: var(--a);">S</div><p class="tiny">State<br>Prompt + 已生成 Token</p></div>
-          <div class="step"><div class="tag" style="background: rgba(139,92,246,0.2); color: var(--b);">A</div><p class="tiny">Action<br>选择下一个 Token</p></div>
-          <div class="step"><div class="tag" style="background: rgba(5,150,105,0.2); color: var(--c);">P</div><p class="tiny">Transition<br>状态确定性转移</p></div>
-          <div class="step"><div class="tag" style="background: rgba(220,38,38,0.2); color: var(--d);">R</div><p class="tiny">Reward<br>EOS 后得到全局奖励</p></div>
-        </div>
+        <h2>监督微调（SFT）：行为克隆</h2>
         <div class="grid-2">
-          <div class="callout callout-a">类比超级玛丽：词表就是按键空间，生成一个词就是按一次键。</div>
-          <div class="callout callout-d">难点：奖励稀疏，中间步骤好坏不可见。</div>
+          <div class="card">
+            <h3 class="accent-a">SFT 是什么？</h3>
+            <p><strong>监督微调（Supervised Fine-Tuning）</strong> = 行为克隆 / 模仿学习</p>
+            <ul>
+              <li class="fragment">人类专家手写数万个高质量"提示词-回复"对</li>
+              <li class="fragment">计算模型预测分布与"黄金标准"答案之间的误差</li>
+              <li class="fragment">通过密集的词级别监督信号，最小化损失函数</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3 class="accent-b">数学本质</h3>
+            <div class="formula">
+              $\mathcal{L}_{SFT} = -\sum_{t=1}^{T} \log \pi_\theta(y_t^* \mid x, y_{&lt;t}^*)$
+            </div>
+            <p class="tiny" style="margin-top:8px;"><strong>交叉熵损失（Cross-Entropy Loss）：</strong>衡量模型预测的下一个 Token 分布与人类标注之间的距离。</p>
+            <div class="callout callout-c tiny fragment" style="margin-top:8px;">
+              效果：模型被强行"拉"到人类对话轨道上&mdash;&mdash;学会了对话格式，遇到提问时给出答案，而非跟着一起提问。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>SFT 的三大致命局限</h2>
+        <p class="muted tiny">SFT 给了模型对话的"外壳"，却没有赋予它探索真理和自我纠错的"灵魂"</p>
+        <div class="grid-3">
+          <div class="card fragment fade-up">
+            <h3 class="accent-d">局限 1</h3>
+            <p><strong>只见"好"，不知"坏"</strong></p>
+            <p class="tiny">模型只学过完美答案，从未见过坏答案，更不知道坏在哪里。</p>
+          </div>
+          <div class="card fragment fade-up">
+            <h3 class="accent-d">局限 2</h3>
+            <p><strong>暴露偏差 &amp; 误差级联</strong></p>
+            <p class="tiny">训练时有"老师"保驾护航，推理时独自面对错误越走越偏。</p>
+          </div>
+          <div class="card fragment fade-up">
+            <h3 class="accent-d">局限 3</h3>
+            <p><strong>分布偏移 &rarr; 生搬硬套</strong></p>
+            <p class="tiny">超出训练数据覆盖范围时，模型为了"看起来专业"而硬拼概念。</p>
+          </div>
+        </div>
+        <div class="callout callout-a fragment" style="margin-top:12px;">
+          要让 AI 真正学会在试错中掌握平衡，我们必须引入<strong>强化学习（RL）</strong>。
+        </div>
+      </section>
+
+      <section>
+        <h2>基础：马尔可夫链（Markov Chain）</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-a">核心性质</h3>
+            <p><strong>马尔可夫性质：</strong>系统的下一个状态，<strong>只取决于当前状态</strong>，与过去的历史轨迹完全无关。</p>
+            <div class="formula">$P(S_{t+1} \mid S_t, S_{t-1}, \dots, S_0) = P(S_{t+1} \mid S_t)$</div>
+            <p class="tiny muted" style="margin-top:6px;">"既往不咎，只看当下" &mdash;&mdash; 俄罗斯数学家安德雷&middot;马尔可夫</p>
+          </div>
+          <div class="card">
+            <h3 class="accent-b">局限性</h3>
+            <p>马尔可夫链描述的是一个"随波逐流"的<strong>自然过程</strong>（如天气晴雨变化）。</p>
+            <p>但在文本生成中，AI 是有<strong>主观能动性</strong>的&mdash;&mdash;我们需要引导它做出"好"的选择。</p>
+            <div class="callout callout-a tiny fragment" style="margin-top:6px;">
+              解决方案：在马尔可夫链框架上加入<strong>"动作"和"奖励"</strong>机制 &rarr; 升级为 MDP
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>马尔可夫决策过程（MDP）</h2>
+        <p class="muted tiny">马尔可夫链 + 动作 + 奖励 = 能够做决策的智能系统</p>
+        <div class="steps">
+          <div class="step fragment fade-up">
+            <div class="tag" style="background: rgba(14,116,144,0.2); color: var(--a);">S</div>
+            <p class="tiny"><strong>状态 State</strong><br>Prompt + 已生成 Token 序列</p>
+          </div>
+          <div class="step fragment fade-up">
+            <div class="tag" style="background: rgba(139,92,246,0.2); color: var(--b);">A</div>
+            <p class="tiny"><strong>动作 Action</strong><br>从词表中选下一个 Token</p>
+          </div>
+          <div class="step fragment fade-up">
+            <div class="tag" style="background: rgba(5,150,105,0.2); color: var(--c);">P</div>
+            <p class="tiny"><strong>转移 Transition</strong><br>确定性：旧上文 + 新词</p>
+          </div>
+          <div class="step fragment fade-up">
+            <div class="tag" style="background: rgba(220,38,38,0.2); color: var(--d);">R</div>
+            <p class="tiny"><strong>奖励 Reward</strong><br>EOS 后全局稀疏奖励</p>
+          </div>
+        </div>
+        <div class="callout callout-a fragment" style="margin-top:14px;">
+          <strong>类比超级玛丽：</strong>状态 = 屏幕像素，动作 = 按手柄，奖励 = 吃金币。<br>
+          LLM：词表就是按键空间，生成一个词就是按一次键。
+        </div>
+
+        <div class="callout callout-a fragment" style="margin-top:14px;">
+          <strong>问题：</strong> LLM的回答是一段文字，如何设计奖励函数来评判它的好坏？
         </div>
       </section>
 
@@ -627,7 +744,7 @@
       </section>
 
       <section class="balanced-vert">
-        <h2><span class="accent-b">模块 B</span> 思维启发：搜索引擎如何给网页排名？</h2>
+        <h2>思维启发：搜索引擎如何给网页排名？</h2>
         <div class="body-center">
           <div class="hero center" style="padding: 20px;">
             <p style="font-size: 0.8em; font-weight: 700;">当你搜索一个关键词，搜索引擎展示了 10 个结果<br>它怎么知道哪个该排第一？</p>
@@ -648,7 +765,7 @@
       </section>
 
       <section class="balanced-vert">
-        <h2><span class="accent-b">模块 B</span> 为什么需要成对比较？</h2>
+        <h2>为什么需要成对比较？</h2>
         <div class="body-center">
           <div class="grid-2">
             <div class="card">
@@ -679,7 +796,7 @@
       </section>
 
       <section class="balanced-vert">
-        <h2><span class="accent-b">模块 B</span> RLHF 偏好数据的标注格式</h2>
+        <h2>RLHF 偏好数据的标注格式</h2>
         <div class="body-center">
           <div class="grid-2">
             <div class="card">
@@ -708,7 +825,7 @@
       </section>
 
       <section class="balanced-vert">
-        <h2><span class="accent-b">模块 B</span> Bradley-Terry 模型：Elo 积分的跨界应用</h2>
+        <h2>Bradley-Terry 模型：Elo 积分的跨界应用</h2>
         <div class="body-center">
           <div class="grid-2">
             <div class="card">
@@ -743,7 +860,7 @@
       </section>
 
       <section class="balanced-vert">
-        <h2><span class="accent-b">模块 B</span> BT 胜率公式：Sigmoid 映射</h2>
+        <h2>BT 胜率公式：Sigmoid 映射</h2>
         <div class="body-center">
           <div class="grid-2">
             <div class="card">
@@ -782,7 +899,7 @@
       </section>
 
       <section class="balanced-vert tight-gap">
-        <h2><span class="accent-b">模块 B</span> 奖励模型的损失函数</h2>
+        <h2>奖励模型的损失函数</h2>
         <div class="body-center tight-gap">
           <div class="card">
             <h3 class="accent-b">二元交叉熵：把“谁更好”当作分类任务</h3>
@@ -803,7 +920,7 @@
       </section>
 
       <section class="balanced-vert tight-gap">
-        <h2><span class="accent-b">模块 B</span> 奖励模型训练流水线</h2>
+        <h2>奖励模型训练流水线</h2>
         <div class="body-center tight-gap">
           <div class="process-strip">
             <div class="process-box"><div class="k">Step 1 · 数据收集</div><div class="v">对同一 Prompt 用 SFT 模型采样多条回答，标注员两两比较选出胜负。</div></div>
@@ -837,7 +954,7 @@
       </section>
 
       <section class="balanced-vert">
-        <h2><span class="accent-b">模块 B</span> BT 模型的局限性</h2>
+        <h2>BT 模型的局限性</h2>
         <div class="body-center">
           <div class="grid-2">
             <div class="card">
@@ -1206,7 +1323,7 @@
               <li>同组总能分出相对更好的推理路径，避免梯度失去方向。</li>
               <li>罕见但优秀的 CoT 会被 Z-Score 放大并固化。</li>
             </ul>
-            <div class="callout callout-c tiny">这就是讲稿强调的“内卷式机制”：模型不是和题目难度打架，而是在自己当前能力边界上不断突围。</div>
+            <div class="callout callout-c tiny">“内卷式机制”：模型不是和题目难度打架，而是在自己当前能力边界上不断突围。</div>
           </div>
         </div>
       </section>
@@ -1237,7 +1354,7 @@
               <li><strong>Self-correction：</strong>意识到错误后自发回滚重算。</li>
               <li><strong>Aha moment：</strong>长思维链中出现顿悟式跳跃。</li>
             </ul>
-            <div class="callout callout-c tiny">讲稿的关键表述是：这些能力并不是靠人工写标准答案“教”出来的，而是在规则奖励 + GRPO 相对评分下，通过强化学习自己涌现出来的。</div>
+            <div class="callout callout-c tiny">这些能力并不是靠人工写标准答案“教”出来的，而是在规则奖励 + GRPO 相对评分下，通过强化学习自己涌现出来的。</div>
           </div>
         </div>
       </section>
