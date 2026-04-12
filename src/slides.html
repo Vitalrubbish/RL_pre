@@ -757,18 +757,24 @@
             <p style="font-size: 0.8em; font-weight: 700;">当你搜索一个关键词，搜索引擎展示了 10 个结果<br>它怎么知道哪个该排第一？</p>
           </div>
           <div class="grid-2">
-            <div class="card fragment fade-right">
+            <div class="card fade-right">
               <h3 class="accent-b">用户点击 = 隐式成对比较</h3>
               <p>你点了第 3 个结果、跳过第 1 和第 2 个，这本质上就是一次投票：<br>“第 3 个比前两个更好”。</p>
               <div class="callout callout-b tiny">Google 的早期排序算法大量利用了这种基于点击的隐式偏好信号。</div>
             </div>
-            <div class="card fragment fade-left">
+            <div class="card fade-left">
               <h3 class="accent-c">RLHF 的偏好收集完全一致</h3>
               <p>不让标注员打绝对分数，而是让他们在两个回答中<strong>选出更好的那个</strong>。</p>
               <div class="callout callout-c tiny">从搜索排序到 LLM 对齐，“成对比较”其实是同一把核心钥匙。</div>
             </div>
           </div>
         </div>
+        <aside class="notes">
+          <p>大家好，我是第二位讲者。正如 A 组员所说，我们需要一个自动化的"裁判"来给 AI 的回答打分。这个裁判就是奖励模型（Reward Model）。</p>
+          <p>但在讲奖励模型之前，我想先请大家思考一个日常问题：当你在 Google 搜索一个关键词时，搜索引擎展示了 10 个结果——它是怎么决定哪个网页该排第一的？</p>
+          <p>答案之一是——用户的点击行为。当你浏览了 10 个结果，点击了第 3 个而跳过了前两个，这实际上就完成了一次隐式的成对比较：你"投票"认为第 3 个结果比第 1 和第 2 个更好。Google 的早期排序算法正是大量利用了这种基于点击的隐式偏好信号。</p>
+          <p>今天我要讲的奖励模型训练,它获取数据标注的方式，核心思路与搜索排序完全一致：不要求标注员给出绝对分数，而是让他们在两个回答中选出更好的那个。</p>
+        </aside>
       </section>
 
       <section class="balanced-vert">
@@ -796,10 +802,15 @@
               <h3 class="accent-b">成对比较：低方差</h3>
               <p>“A 和 B 哪个更好？”这个问题更符合人类直觉，判断速度更快、一致性也更高。</p>
               <div class="callout callout-b tiny">它把困难的绝对量化问题，降维成简单的相对排序问题。</div>
-              <p class="tiny fragment" style="margin-top: 8px;">标注一致性（Inter-Annotator Agreement）往往会明显高于绝对打分。</p>
+              <p class="tiny" style="margin-top: 8px;">标注一致性（Inter-Annotator Agreement）往往会明显高于绝对打分。</p>
             </div>
           </div>
         </div>
+        <aside class="notes">
+          <p>为什么一定要用成对比较，而不能直接打分呢？</p>
+          <p>人类的主观评价存在一个经典问题：绝对打分极不稳定。举个大家都经历过的例子，我们高中写的语文作文给老师打分时，有老师标准严格可能给 68 分，有些老师可能更喜好该作文给 92 分。同一篇作文，不同标注员的打分可能相差二三十分。这种高方差的数据很难用来训练神经网络——高方差会变成不稳定的梯度信号，使得模型难以收敛。</p>
+          <p>但如果我把两篇作文 A 和 B 放在一起，问大家"哪篇更好？"，绝大多数人都能迅速且一致地给出判断。这就是成对比较的核心优势：它把困难的绝对量化问题，简化成了简单的相对排序问题，标注一致性显著提高。从认知心理学的角度看，人类对"相对差异"往往比对"绝对刻度"更敏感，我们不擅长稳定地说出一个分数，却很擅长判断"这个比那个更好"。</p>
+        </aside>
       </section>
 
       <section class="balanced-vert">
@@ -825,10 +836,14 @@
                 <div class="process-box"><div class="k">配对</div><div class="v">将候选回答两两组合，形成比较对。</div></div>
                 <div class="process-box"><div class="k">标注</div><div class="v">人类标注员从每对中选出更好的那个。</div></div>
               </div>
-              <div class="callout callout-a tiny fragment">InstructGPT：40 名标注员，约 33k 偏好对，训练出第一代对齐奖励模型。</div>
+              <div class="callout callout-a tiny">InstructGPT：40 名标注员，约 33k 偏好对，训练出第一代对齐奖励模型。</div>
             </div>
           </div>
         </div>
+        <aside class="notes">
+          <p>因此，现代 RLHF 对齐工程放弃了绝对打分，转而收集海量的成对偏好数据。数据的标注格式是一个三元组：(x, y_c, y_r)。其中 x 是用户的问题（Prompt），y_c 是被标注员选中的更好回答——我们称之为 Chosen，y_r 是被拒绝的较差回答——Rejected。</p>
+          <p>在实际操作中，工程师会先用 SFT 模型对同一个 Prompt 采样出多条回答，然后把它们两两配对，交给人类标注员判断谁更好"。举个例子 OpenAI 在 InstructGPT 论文中雇佣了 40 名标注员，通过这种方式积累了约 33,000 组偏好对，用来训练第一代对齐奖励模型。</p>
+        </aside>
       </section>
 
       <section class="balanced-vert">
@@ -862,8 +877,13 @@
               <p class="tiny" style="margin-top: 8px;">分差 240 时，高分方胜率可达 95% 以上。<br>奖励模型就是在学一套与人类偏好一致的“Elo 评分系统”。</p>
             </div>
           </div>
-          <div class="callout callout-b fragment">关键洞察：我们不需要知道绝对分数，只需要知道分差，因为分差决定了胜率。</div>
+          <div class="callout callout-b">关键洞察：我们不需要知道绝对分数，只需要知道分差，因为分差决定了胜率。</div>
         </div>
+        <aside class="notes">
+          <p>有了成对比较的偏好数据，下一步的核心问题是：如何用数学模型将"A 比 B 好"这些离散判断，转化为一个能输出连续分数的奖励函数？</p>
+          <p>这里，业界巧妙地借用了统计学中的经典模型——Bradley-Terry 模型。这个模型名称可能大家很陌生，但是</p>
+          <p>大家可能听说过 Elo 积分系统，它被广泛地用在游戏排位之中，它最初的应用是在是国际象棋中。BT 模型正是 Elo 评分的核心数学基础。它的直觉非常简单：假设每个回答都有一个隐藏的分数 r，当两个回答进行比较时，分数更高的那个获胜的概率更大。而如何量化这个概率的大小呢，我们通过分差的大小来计算概率，分差更大、获胜的概率更高。所以从工程视角看，奖励模型做的事情并不是直接生成文本，而是在训练一个专门的评分器，负责回答"这条回复有多符合人类偏好"。</p>
+        </aside>
       </section>
 
       <section class="balanced-vert">
@@ -903,6 +923,13 @@
             </div>
           </div>
         </div>
+        <aside class="notes">
+          <p>具体地说，BT 模型用一个非常简洁的公式来描述获胜概率：</p>
+          <p>P(y_c 胜过 y_r | x) = sigmoid(r_theta(x, y_c) - r_theta(x, y_r)).</p>
+          <p>这里 r_theta 就是我们要训练的奖励模型。关键是中间的 sigmoid 函数 sigma：它把两个回答之间的实力差值——一个可以是任意实数的值——映射到 0 到 1 之间的概率区间。</p>
+          <p>如果奖励模型认为 y_c 远好于 y_r，分差极大，那么 sigmoid 输出就趋近于 1，意味着胜率接近 100%。如果两者实力相当，分差为 0，sigmoid 输出 0.5，胜率就是 50%。如果分差为负，说明 y_c 反而更弱，胜率会降到 50% 以下。这里有一个很重要的点：模型先输出的是分数，不是概率；概率是由分差再经过 sigmoid 转换出来的。这样设计的好处是，模型表达更灵活，也更容易和后面的损失函数衔接。</p>
+          <p>大家可以看幻灯片上的对应表：分差为 2 时胜率约 88%，分差为 5 时胜率高达 99.3%。这和 Elo 系统的行为完全一致。</p>
+        </aside>
       </section>
 
       <section class="balanced-vert tight-gap">
@@ -913,17 +940,23 @@
             <div class="formula">$$\mathcal{L}_{RM}=-\mathbb{E}_{(x,y_c,y_r)\sim\mathcal{D}}\!\left[\log\sigma\!\left(r_\theta(x,y_c)-r_\theta(x,y_r)\right)\right]$$</div>
           </div>
           <div class="grid-2">
-            <div class="card fragment">
+            <div class="card">
               <h3 class="accent-c">训练目标</h3>
               <p class="tiny">梯度下降不断更新 $\theta$：<br>拉高 Chosen 分数，压低 Rejected 分数，让分差越来越大，最终让 $\sigma$ 输出逼近 1。</p>
             </div>
-            <div class="card fragment">
+            <div class="card">
               <h3 class="accent-a">直觉类比</h3>
               <p class="tiny">就像 Elo 系统中，每场对局结束后根据胜负调整双方积分。这里每个偏好对就是一场“对局”，梯度下降就是“积分调整”的过程。</p>
               <div class="callout callout-a tiny">区别在于：Elo 用固定更新公式，RM 是端到端优化一个神经网络评分器。</div>
             </div>
           </div>
         </div>
+        <aside class="notes">
+          <p>有了概率模型，训练目标就清晰了。我们使用标准的二元交叉熵损失函数：</p>
+          <p>L = -E[log(sigmoid(r_theta(x, y_c) - r_theta(x, y_r)))].</p>
+          <p>这个损失函数的直觉很直白：通过梯度下降不断更新奖励模型的参数 theta，迫使它拉大好答案与坏答案之间的分数差距。当训练收敛时，Chosen 的分数远高于 Rejected，sigmoid 输出接近 1，log(1) 约等于 0，损失趋近于零——这正是我们想要的。</p>
+          <p>本质上就是把"谁更好"这个偏好判断，当作一个二分类任务来训练。就像 Elo 系统中每场对局后根据胜负调整积分，这里每个偏好对就是一场"对局"，梯度下降就是"积分调整"的过程。如果模型把排序判断错了，或者虽然判断对了、但分差拉得还不够开，损失都会比较大；只有当它既判断正确、又有足够置信度时，损失才会真正下降。</p>
+        </aside>
       </section>
 
       <section class="balanced-vert tight-gap">
@@ -958,6 +991,13 @@
             </div>
           </div>
         </div>
+        <aside class="notes">
+          <p>让我用一张流水线图总结整个过程：</p>
+          <p>第一步，数据收集：对同一个 Prompt，用 SFT 模型采样出多条回答，交给标注员两两比较选出胜负。</p>
+          <p>第二步，模型初始化：从预训练的大语言模型出发，对它进行修改，使其适配我们需要的输出。</p>
+          <p>第三步，梯度优化：在偏好对数据集上，用刚才讲的 BT 损失函数做梯度下降，不断拉大 Chosen 与 Rejected 的分差。</p>
+          <p>第四步，部署上线：训练收敛后，这个奖励模型就可以作为 PPO 等强化学习算法的自动"裁判"，给模型生成的每一条回答实时打分。所以它虽然不直接面向用户，却在整个 RLHF 流程里扮演了一个非常关键的中间角色：它决定了大模型接下来会被向哪个方向改变。</p>
+        </aside>
       </section>
 
       <section class="balanced-vert">
@@ -980,10 +1020,17 @@
               <div class="callout callout-b tiny">但工程上 BT 仍是主流，因为它简单、高效、可微，而且在大规模数据下已经足够好用。</div>
             </div>
           </div>
-          <div class="callout callout-a fragment">
+          <div class="callout callout-a">
             我们现在已经有了一个能评判回答好坏的奖励模型。下一步，就是把这些分数真正反哺给大模型，推动它继续进化。
           </div>
         </div>
+        <aside class="notes">
+          <p>当然，BT 模型并非完美。它依赖一个很强的假设：偏好满足传递性。如果 A 胜过 B，B 胜过 C，那么 A 必定胜过 C。</p>
+          <p>但在人类语言评价的复杂世界中，这个假设经常被违反。比如：回答 A 在逻辑严谨性上胜过 B，B 在文采优美上胜过 C，而 C 在简洁精炼上又反过来胜过 A。这就形成了像"石头剪刀布"一样的循环偏好——数学上叫做非传递性。</p>
+          <p>学术界正在通过几个前沿方向来突破这一限制：一是多维奖励建模，不再用单一分数，而是从逻辑性、安全性、文采等维度独立打分；二是偏好嵌入技术，在高维向量空间中建模非传递结构。</p>
+          <p>但工程上 BT 仍是主流，因为它简单、高效、可微，而且在大规模数据下已经足够好用。</p>
+          <p>过渡语："现在，我们拥有了一个能精准评判回答好坏的奖励模型。接下来的挑战是：如何将这些分数反哺给大模型，驱使它进化？有请 张煊同学 为我们带来PPO 算法和 Reward Hacking"</p>
+        </aside>
       </section>
 
       <section class="center">
