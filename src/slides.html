@@ -553,7 +553,6 @@
             </div>
             <p class="tiny muted" style="margin-top:6px;">事实精准，但语气傲慢甚至有攻击性</p>
           </div>
-          <div class="vs-label">VS</div>
           <div class="quote-box fragment fade-left" style="border-left: 4px solid var(--c);">
             <div class="qt">
               <strong class="accent-c">回答 B</strong><br>
@@ -577,15 +576,23 @@
           </div>
         </div>
         <div class="callout callout-a fragment">
-          <strong>"礼貌悖论"：</strong>研究发现，使用粗鲁提示词时 AI 准确率反而更高&mdash;&mdash;因为过多客套话在概率系统里引入了噪音，稀释了核心指令。
+          <strong>"礼貌悖论"：</strong>研究发现，使用严厉提示词时 AI 准确率反而更高&mdash;&mdash;因为过多客套话在概率系统里引入了噪音，稀释了核心指令。
         </div>
         <div class="callout callout-d fragment">
           这正是<strong>对齐（Alignment）</strong>的主观性与困难所在：让千亿参数的概率机器变得"有用、诚实且无害"，充满了妥协与博弈。
         </div>
+
+        
       </section>
 
       <section>
         <h2>对齐的目标 HHH 原则</h2>
+
+        <div class="callout callout-d fragment">
+        对齐（Alignment）就是把原本像“野马”一样不受控的 AI 模型，驯化成听得懂指令、守规矩、且符合人类价值观的贴心助手。
+        </div>
+
+
         <div class="grid-3">
           <div class="card fragment fade-up" style="text-align:center;">
             <div style="font-size:2em; margin-bottom:4px;">H</div>
@@ -644,9 +651,9 @@
             <h3 class="accent-a">SFT 是什么？</h3>
             <p><strong>监督微调（Supervised Fine-Tuning）</strong> = 行为克隆 / 模仿学习</p>
             <ul>
-              <li class="fragment">人类专家手写数万个高质量"提示词-回复"对</li>
-              <li class="fragment">计算模型预测分布与"黄金标准"答案之间的误差</li>
-              <li class="fragment">通过密集的词级别监督信号，最小化损失函数</li>
+              <li>人类专家手写数万个高质量"提示词-回复"对</li>
+              <li>计算模型预测分布与"黄金标准"答案之间的误差</li>
+              <li>通过密集的词级别监督信号，最小化损失函数</li>
             </ul>
           </div>
           <div class="card">
