@@ -561,6 +561,11 @@
             <p class="tiny muted" style="margin-top:6px;">语气友好，但混淆了不确定性原理与观察者效应</p>
           </div>
         </div>
+        <aside class="notes">
+          <p>大家好，我是第一位讲者。在正式进入今天关于大语言模型对齐工程的技术探讨之前，我想先请大家跟我一起做一个简短的互动投票。</p>
+          <p>大家想象一下，当我们耗费数千万美元，用几万张 GPU 训练出一个拥有千亿参数的模型时，它已经读完了互联网上几乎所有的文本。</p>
+          <p>现在，你向这个 AI 提问：“请解释一下量子力学中的海森堡不确定性原理。”系统给出了两个版本的回复。A 事实很准，但语气刻薄；B 语气很友好，但把不确定性原理和观察者效应混为一谈。大家会选哪一个？觉得 A 更好的请举手？觉得 B 更好的请举手？</p>
+        </aside>
       </section>
 
       <section>
@@ -581,8 +586,11 @@
         <div class="callout callout-d fragment">
           这正是<strong>对齐（Alignment）</strong>的主观性与困难所在：让千亿参数的概率机器变得"有用、诚实且无害"，充满了妥协与博弈。
         </div>
-
-        
+        <aside class="notes">
+          <p>这其实是一个真实的行业痛点。A 的问题是态度差，B 的问题是内容错。也就是说，模型到底算“好回答”，并不是一个单一维度的问题。</p>
+          <p>其实，AI 并不懂什么是“礼貌”。甚至有研究发现一个有趣的“礼貌悖论”：过多客套话有时会稀释核心指令，反而降低模型准确率。</p>
+          <p>这个开场投票，其实就揭示了我们今天的主题，也就是对齐的主观性和困难所在。</p>
+        </aside>
       </section>
 
       <section>
@@ -613,11 +621,21 @@
         <div class="callout callout-a fragment" style="margin-top:14px;">
           AI 本身不懂什么是"礼貌"或"正确"。对齐工程的使命，就是将这些<strong>人类价值观</strong>注入到概率模型中。
         </div>
+        <aside class="notes">
+          <p>这个开场投票，其实就揭示了我们今天的主题——对齐的主观性和困难所在。我们要让一个千亿参数的概率机器变得“有用、诚实且无害”，这中间充满了妥协与博弈。</p>
+          <p>我们今天希望让模型变得有用、诚实且无害，也就是常说的 HHH 原则。</p>
+          <p>对齐这个词，说白了，就是把原本像野马一样不受控的 AI 模型，驯化成听得懂指令、守规矩、且符合人类价值观的贴心助手。</p>
+          <p>AI 本身不懂什么是“礼貌”或“正确”。对齐工程的使命，就是将这些人类价值观注入到概率模型中。</p>
+          <p>接下来，我将分四个部分，为大家剖析我们是如何一步步驯服这些庞然大物的。</p>
+        </aside>
       </section>
 
       <section class="center">
           <h2>第一部分</h2>
           <h2> LLM为什么需要强化学习？</h2>
+          <aside class="notes">
+            <p>下面进入第一部分。我们先来聊聊，为什么大语言模型需要强化学习。</p>
+          </aside>
       </section>
 
 
@@ -642,6 +660,11 @@
         <div class="callout callout-a fragment">
           预训练 &ne; 对话能力。模型只学会了"接龙"，没有学会"回答"。
         </div>
+        <aside class="notes">
+          <p>首先，为什么模型刚训练出来时，不能直接当助手用？我们要知道，在预训练阶段，模型的核心目标只有一个：预测下一个词。</p>
+          <p>这个时候的模型，本质上就是一个“通用文档补全器”。它只是在忠实地模仿互联网文本的概率分布。</p>
+          <p>如果你直接问一个刚出炉的 Base 模型：“如何写一封请假信？”它极大概率不会给你模版，而是会紧接着输出：“如何写一封辞职信？”或者“大家遇到这种情况都是怎么请假的？”。为什么？因为它在模仿各大论坛里的提问帖子，提问下面往往跟着网友的“同问”，而不是标准答案。</p>
+        </aside>
       </section>
 
       <section>
@@ -667,6 +690,12 @@
             </div>
           </div>
         </div>
+        <aside class="notes">
+          <p>为了跨越这道从“词语接龙”到“有用助手”的鸿沟，工程师们引入了第一步：监督微调，也就是 SFT。</p>
+          <p>从理论基础上来说，SFT 本质上是一种行为克隆，也就是模仿学习。</p>
+          <p>我们让人类专家写出大量高质量的“提示词-回复”对，再用交叉熵损失去逼近这些标准答案。通过密集的词级别监督信号，模型就被强行拉到人类对话的轨道上，学会遇到提问时应该给出回答，而不是继续接龙。</p>
+          <p>这听起来很完美，对吧？有了 SFT，模型似乎就能听懂指令了。但是，如果我们只依赖 SFT，很快就会撞上一堵“技术叹息之墙”。</p>
+        </aside>
       </section>
 
       <section>
@@ -692,6 +721,14 @@
         <div class="callout callout-a fragment" style="margin-top:12px;">
           要让 AI 真正学会在试错中掌握平衡，我们必须引入<strong>强化学习（RL）</strong>。
         </div>
+        <aside class="notes">
+          <p>SFT 也就是监督微调，虽然好用，但它存在几个在数学范式上无法克服的瓶颈。主要体现在三个方面。</p>
+          <p>第一，它是“模仿学习”，模型不知“坏”为何物。在 SFT 的训练数据里，模型只见过人类专家写出的“好答案”，却不知道坏答案到底坏在哪里。这就像学骑自行车时只看教学录像，却从来没有亲自摔过。</p>
+          <p>第二，暴露偏差与误差级联。在 SFT 训练时，模型每一步看到的都是人类提供的“完美前文”，这叫教师强制。但真正推理时，模型必须基于自己刚刚生成的内容继续往下写。一旦前面出现一点偏差，后面就可能一路滚大，最终导致幻觉。</p>
+          <p>第三，分布偏移导致“生搬硬套”。当遇到超出 SFT 数据覆盖范围的复杂问题时，模型为了维持一种“看起来很专业”的回答格式，往往会把相似概念硬拼在一起，即便逻辑根本不通。</p>
+          <p>所以，SFT 只是给了模型一个对话的“外壳”，却没有赋予它探索真理和自我纠错的“灵魂”。</p>
+          <p>要让 AI 真正学会像骑自行车那样在试错中掌握平衡，我们必须引入强化学习。而在计算机中应用强化学习的第一步，就是必须把“生成文本”这件感性的事，变成一道严谨的数学题。</p>
+        </aside>
       </section>
 
       <section>
@@ -704,50 +741,106 @@
             <p class="tiny muted" style="margin-top:6px;">"既往不咎，只看当下" &mdash;&mdash; 俄罗斯数学家安德雷&middot;马尔可夫</p>
           </div>
           <div class="card">
-            <h3 class="accent-b">局限性</h3>
-            <p>马尔可夫链描述的是一个"随波逐流"的<strong>自然过程</strong>（如天气晴雨变化）。</p>
-            <p>但在文本生成中，AI 是有<strong>主观能动性</strong>的&mdash;&mdash;我们需要引导它做出"好"的选择。</p>
-            <div class="callout callout-a tiny fragment" style="margin-top:6px;">
-              解决方案：在马尔可夫链框架上加入<strong>"动作"和"奖励"</strong>机制 &rarr; 升级为 MDP
+            <h3 class="accent-b">直观例子：天气</h3>
+            <p>我们通常只关心<strong>今天的天气如何影响明天</strong>，而不会把更久之前的历史无限往前追。</p>
+            <p class="tiny">这就体现了马尔可夫思想：系统的演化主要由<strong>当前状态</strong>决定。</p>
+            <div class="callout callout-a tiny" style="margin-top:6px;">
+              但天气只是自然演化过程；在文本生成里，我们还需要加入<strong>"动作"和"奖励"</strong>机制 &rarr; 升级为 MDP
             </div>
           </div>
         </div>
+        <aside class="notes">
+          <p>在讲RL之前呢，我们需要先去了解他的基础，也就是马尔可夫决策过程MDP。而在讲 MDP 之前，我们得先认识一个统计学里的基础模型：马尔可夫链。</p>
+          <p>它是由马尔可夫提出的，用来描述一个系统随时间状态转移的过程。马尔可夫链的精髓叫做“马尔可夫性质”——即系统的下一个状态，只取决于它当前的状态，而与它过去的历史轨迹完全无关。简单来说，就是“既往不咎，只看当下”。</p>
+          <p>如果用数学语言来写，这个性质就是屏幕上的公式。也就是说，只要当前状态已经给定，过去那一长串历史就可以被压缩掉。</p>
+          <p>比如天气系统里，我们通常只关心“今天的天气会如何影响明天”，而不会把更久之前的历史无限往前追。这就体现了马尔可夫思想：系统的演化由当前状态决定。</p>
+          <p>然而，单纯的马尔可夫链描述的是一个“随波逐流”的自然过程，而在文本生成中，AI 是有主观能动性的。我们需要引导它做出“好”的选择。</p>
+        </aside>
+      </section>
+
+      <section>
+        <h2>从马尔可夫链到 MDP</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3 class="accent-b">马尔可夫链在做什么？</h3>
+            <p>它只描述<strong>状态如何自然演化</strong>。</p>
+            <p class="tiny">例如天气系统里，我们只能根据今天的晴雨去预测明天，但系统本身不会“主动追求某个目标”。</p>
+            <div class="formula">$P(S_{t+1}\mid S_t)$</div>
+          </div>
+          <div class="card">
+            <h3 class="accent-a">MDP 多了什么？</h3>
+            <p>加入<strong>动作</strong>和<strong>奖励</strong>之后，系统就不再只是被动演化，而是在“做选择”。</p>
+            <p class="tiny">语言模型每一步都要选下一个 Token，并希望整段回答最终拿到更高分。</p>
+            <div class="formula">$P(S_{t+1}\mid S_t, A_t),\; R_t$</div>
+          </div>
+        </div>
+        <div class="callout callout-a" style="margin-top:14px;">
+          马尔可夫链研究“系统会怎么变”，MDP 研究“智能体该怎么选”。
+        </div>
+        <aside class="notes">
+          <p>因此，当我们在马尔可夫链的框架上，加入了动作和奖励机制后，它就升级成了一个能够做决策的系统——马尔可夫决策过程，也就是 MDP。</p>
+          <p>一个标准的 MDP，通常写成五元组：状态空间、动作空间、转移概率、奖励函数和折扣因子。</p>
+          <p>而强化学习真正要学的对象，叫做策略。它表示在某个状态下，应该以多大的概率选择某个动作。对大语言模型来说，这个策略其实就是模型在每一步生成时输出的那个 Token 概率分布。</p>
+          <p>单纯的马尔可夫链只是在描述系统如何自然演化；但如果我们给系统加入动作和奖励，它就不再只是“自己变化”，而是在“做选择”。</p>
+        </aside>
       </section>
 
       <section>
         <h2>马尔可夫决策过程（MDP）</h2>
-        <p class="muted tiny">马尔可夫链 + 动作 + 奖励 = 能够做决策的智能系统</p>
+        <p class="muted tiny">标准形式：$\mathcal{M}=(\mathcal{S},\mathcal{A},P,R,\gamma)$，即状态、动作、转移、奖励与折扣因子</p>
         <div class="steps">
-          <div class="step fragment fade-up">
+          <div class="step">
             <div class="tag" style="background: rgba(14,116,144,0.2); color: var(--a);">S</div>
-            <p class="tiny"><strong>状态 State</strong><br>Prompt + 已生成 Token 序列</p>
+            <p class="tiny"><strong>状态 State</strong><br>$s_t=(x,y_{&lt;t})$<br>Prompt + 当前前缀<br><span class="muted">例："写请假邮件" + "尊敬的老师"</span></p>
           </div>
-          <div class="step fragment fade-up">
+          <div class="step">
             <div class="tag" style="background: rgba(139,92,246,0.2); color: var(--b);">A</div>
-            <p class="tiny"><strong>动作 Action</strong><br>从词表中选下一个 Token</p>
+            <p class="tiny"><strong>动作 Action</strong><br>$a_t=y_t$<br>从词表中选下一个 Token<br><span class="muted">例：下一词选 $F$ / "力"</span></p>
           </div>
-          <div class="step fragment fade-up">
+          <div class="step">
             <div class="tag" style="background: rgba(5,150,105,0.2); color: var(--c);">P</div>
-            <p class="tiny"><strong>转移 Transition</strong><br>确定性：旧上文 + 新词</p>
+            <p class="tiny"><strong>转移 Transition</strong><br>$s_{t+1}=T(s_t,a_t)$<br>确定性：旧上文 + 新词<br><span class="muted">例：补全出 `print(i)`</span></p>
           </div>
-          <div class="step fragment fade-up">
+          <div class="step">
             <div class="tag" style="background: rgba(220,38,38,0.2); color: var(--d);">R</div>
-            <p class="tiny"><strong>奖励 Reward</strong><br>EOS 后全局稀疏奖励</p>
+            <p class="tiny"><strong>奖励 Reward</strong><br>$R(x,y)$ 或末端 $r_T$<br>通常是 EOS 后的稀疏奖励<br><span class="muted">例：帮助性 / 测试通过 / 答案正确</span></p>
           </div>
         </div>
-        <div class="callout callout-a fragment" style="margin-top:14px;">
-          <strong>类比超级玛丽：</strong>状态 = 屏幕像素，动作 = 按手柄，奖励 = 吃金币。<br>
-          LLM：词表就是按键空间，生成一个词就是按一次键。
+        <div class="grid-2" style="margin-top:14px; gap:10px;">
+          <div class="formula"><strong>状态与策略：</strong> $s_t=(x,y_{&lt;t}),\quad \pi_\theta(a_t\mid s_t)=\pi_\theta(y_t\mid x,y_{&lt;t})$</div>
+          <div class="formula"><strong>动作概率（Softmax）：</strong> $\pi_\theta(a_t\mid s_t)=\frac{\exp(z_{a_t})}{\sum_{a'\in\mathcal{V}}\exp(z_{a'})}$</div>
         </div>
-
-        <div class="callout callout-a fragment" style="margin-top:14px;">
-          <strong>问题：</strong> LLM的回答是一段文字，如何设计奖励函数来评判它的好坏？
+        <div class="grid-2" style="margin-top:10px; gap:10px;">
+          <div class="formula"><strong>状态转移：</strong> $s_{t+1}=(x,y_{\le t})=T(s_t,a_t),\quad a_t\in\mathcal{V}$</div>
+          <div class="formula"><strong>终局奖励：</strong> $r_T\approx R(x,y)$，通常只在生成结束后给出</div>
         </div>
+        <aside class="notes">
+          <p>在这里我们以自然语言为例，讲讲他具体是生成映射为 MDP </p>
+          <p>第一，状态空间。在大语言模型中，当前时刻的“状态”，就是用户的提示词加上模型目前已经生成的所有上文 Token 序列。</p>
+          <p>因为 Transformer 的注意力机制会看到前面所有的词，这意味着在这里“当前状态”就已经浓缩了所有的历史记忆，完美符合了马尔可夫性质的要求。</p>
+          <p>比如说，用户问模型“请帮我写一封给导师的请假邮件”，如果前面已经生成了“尊敬的老师”，那么后面接什么，就要由当前上下文共同决定。</p>
+          <p>如果写得更形式化一点，在第 t 步时，状态可以记作：用户输入加上已经生成出来的前缀序列。于是，所谓满足马尔可夫性，在这里就变成：下一个 Token 的分布只依赖于这个前缀状态。</p>
+          <p>虽然，严格来说，自然语言本身未必真的是一个完美马尔可夫过程。但是对于 Transformer 来说，只要我们把当前可见的完整上下文窗口都放进状态定义里，算法上就可以把它视为一个近似满足马尔可夫性质的决策过程。</p>
+          <p>第二，动作空间。模型的动作，就是从它的词表中选择下一个要输出的 Token。</p>
+          <p>大家知道这个动作空间有多大吗？以 Llama 3 为例，它的词表大小是 12.8 万。这意味着，模型每输出一个字，实际上都在做一个 12.8 万选 1 的动作决策。这是一个极其庞大、极其恐怖的动作迷宫。</p>
+          <p>比如模型已经生成了“牛顿第二定律可以表示为”，下一步可能输出 F，也可能输出“力”。这本质上就是一次动作选择。</p>
+          <p>从数学上说，如果词表记作 V，那么动作空间就是 V。在每一步，模型都会输出一个 logits 向量，再经过 softmax，得到对所有候选 Token 的概率分布。也就是说，在 RL 的视角里，解码策略不是一个后处理小技巧，而是动作选择机制本身的一部分。</p>
+          <p>第三，转移函数。与机器人走路会遇到打滑等随机环境不同，文本生成的环境转移是完全确定性的。模型决定输出哪个词，下一个状态就必定是旧上文加上新词的无缝拼接。</p>
+          <p>例如在代码补全场景里，如果模型下一步生成了 print(i)，那后续状态就立刻更新。整个变化过程完全由模型刚刚那一步输出决定。</p>
+          <p>如果写成公式，就是旧状态加上当前动作。这里的转移函数本质上就是一个字符串拼接器。所以很多论文会把文本生成环境称为确定性环境。</p>
+          <p>这件事在应用上很关键。因为一旦环境是确定的，训练中的一部分方差就不来自环境噪音，而是来自策略采样本身。</p>
+          <p>第四，奖励函数。这是 MDP 里最难的一步。状态、动作和转移都还能清楚定义，但“一个回答到底有多好”并没有天然标准。尤其在文本生成里，奖励通常是稀疏而且主观的，往往要等整段话生成完才能评价。</p>
+          <p>那我们具体如何进行这奖励函数呢，下面就让我们把舞台交给张成宇同学。</p>
+        </aside>
       </section>
 
       <section class="center">
           <h2>第二部分</h2>
           <h2> Bradley-Terry 奖励模型 </h2>
+          <aside class="notes">
+            <p>换句话说，前 3 项都比较像工程定义题，真正难的是第 4 项，因为它开始触及人类偏好本身。</p>
+            <p>所以接下来的关键问题就是：怎样把人类的偏好，变成一个可计算、可训练的奖励信号？这个问题，就交给下一位同学继续展开。</p>
+          </aside>
       </section>
 
       <section class="balanced-vert">
